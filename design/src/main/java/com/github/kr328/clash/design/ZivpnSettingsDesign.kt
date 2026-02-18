@@ -72,6 +72,46 @@ class ZivpnSettingsDesign(
                 title = R.string.zivpn_ports,
                 placeholder = R.string.zivpn_ports_summary
             )
+
+            editableText(
+                value = store::hysteriaUpMbps,
+                adapter = stringAdapter,
+                icon = R.drawable.ic_baseline_speed,
+                title = R.string.zivpn_up_mbps,
+                placeholder = R.string.zivpn_up_mbps
+            )
+
+            editableText(
+                value = store::hysteriaDownMbps,
+                adapter = stringAdapter,
+                icon = R.drawable.ic_baseline_speed,
+                title = R.string.zivpn_down_mbps,
+                placeholder = R.string.zivpn_down_mbps
+            )
+
+            editableText(
+                value = store::hysteriaRecvWindow,
+                adapter = stringAdapter,
+                icon = R.drawable.ic_baseline_info,
+                title = R.string.zivpn_recv_window,
+                placeholder = R.string.zivpn_recv_window
+            )
+
+            editableText(
+                value = store::hysteriaRecvWindowConn,
+                adapter = stringAdapter,
+                icon = R.drawable.ic_baseline_info,
+                title = R.string.zivpn_recv_window_conn,
+                placeholder = R.string.zivpn_recv_window_conn
+            )
+
+            editableText(
+                value = store::clashYaml,
+                adapter = stringAdapter,
+                icon = R.drawable.ic_baseline_code,
+                title = R.string.zivpn_yaml,
+                placeholder = R.string.zivpn_yaml
+            )
         }
 
         binding.content.addView(screen.root)

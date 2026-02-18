@@ -32,4 +32,29 @@ class ZivpnStore(context: Context) {
         key = "zivpn_port_ranges",
         defaultValue = "6000-7750,7751-9500,9501-11250,11251-13000,13001-14750,14751-16500,16501-18250,18251-19999"
     )
+
+    var hysteriaUpMbps: String by store.string(
+        key = "zivpn_hysteria_up_mbps",
+        defaultValue = "100"
+    )
+
+    var hysteriaDownMbps: String by store.string(
+        key = "zivpn_hysteria_down_mbps",
+        defaultValue = "100"
+    )
+
+    var hysteriaRecvWindow: String by store.string(
+        key = "zivpn_hysteria_recv_window",
+        defaultValue = "327680"
+    )
+
+    var hysteriaRecvWindowConn: String by store.string(
+        key = "zivpn_hysteria_recv_window_conn",
+        defaultValue = "131072"
+    )
+
+    var clashYaml: String by store.string(
+        key = "zivpn_clash_yaml",
+        defaultValue = ""
+    )
 }

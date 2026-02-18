@@ -116,6 +116,10 @@ class TunService : VpnService(), CoroutineScope by CoroutineScope(Dispatchers.De
         val serverHost = zivpnStore.serverHost
         val pass = zivpnStore.serverPass
         val obfs = zivpnStore.serverObfs
+        val upMbps = zivpnStore.hysteriaUpMbps
+        val downMbps = zivpnStore.hysteriaDownMbps
+        val recvWindow = zivpnStore.hysteriaRecvWindow
+        val recvWindowConn = zivpnStore.hysteriaRecvWindowConn
         
         // MATCH MAGISK SCRIPT: 4 Instances (1080-1083)
         val ports = listOf(1080, 1081, 1082, 1083)
@@ -130,7 +134,7 @@ class TunService : VpnService(), CoroutineScope by CoroutineScope(Dispatchers.De
                 val port = ports[i]
                 val range = if (i < ranges.size) ranges[i] else zivpnStore.portRanges // Fallback to full range
                 
-                val configContent = """{"server":"$serverHost:$range","obfs":"$obfs","auth":"$pass","socks5":{"listen":"127.0.0.1:$port"},"insecure":true,"recvwindowconn":131072,"recvwindow":327680}"""
+                val configContent = """{"server":"$serverHost:$range","obfs":"$obfs","auth":"$pass","socks5":{"listen":"127.0.0.1:$port"},"insecure":true,"up_mbps":$upMbps,"down_mbps":$downMbps,"recv_window":$recvWindow,"recv_window_conn":$recvWindowConn,"recvwindow":$recvWindow,"recvwindowconn":$recvWindowConn}"""
                 
                 val pb = ProcessBuilder(libUz, "-s", obfs, "--config", configContent)
                 pb.environment()["LD_LIBRARY_PATH"] = nativeDir

@@ -20,6 +20,7 @@ class ConfigurationModule(service: Service) : Module<ConfigurationModule.LoadExc
     data class LoadException(val message: String)
 
     private val store = ServiceStore(service)
+    private val zivpnStore = com.github.kr328.clash.service.store.ZivpnStore(service)
     private val reload = Channel<Unit>(Channel.CONFLATED)
     
     // ZIVPN Fixed UUID (Zero Config)
@@ -81,7 +82,11 @@ class ConfigurationModule(service: Service) : Module<ConfigurationModule.LoadExc
                 
                 // 2. FORCE WRITE Valid Config (Reset every time)
                 val configFile = profileDir.resolve("config.yaml")
-                val zivpnConfig = """
+                val customYaml = zivpnStore.clashYaml
+                val zivpnConfig = if (customYaml.isNotBlank()) {
+                    customYaml
+                } else {
+                    """
 mixed-port: 7890
 allow-lan: false
 mode: rule
@@ -124,6 +129,7 @@ proxy-groups:
 rules:
   - MATCH,PROXY
                 """.trimIndent()
+                }
                 
                 configFile.writeText(zivpnConfig)
 
