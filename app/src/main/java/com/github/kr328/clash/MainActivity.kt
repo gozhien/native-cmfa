@@ -1,0 +1,187 @@
+package com.github.kr328.clash
+
+import android.content.pm.PackageManager
+import android.os.Build
+import android.os.Bundle
+import android.os.PersistableBundle
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import com.github.kr328.clash.common.util.intent
+import com.github.kr328.clash.common.util.ticker
+import com.github.kr328.clash.design.MainDesign
+import com.github.kr328.clash.design.ui.ToastDuration
+import com.github.kr328.clash.util.startClashService
+import com.github.kr328.clash.util.stopClashService
+import com.github.kr328.clash.util.withClash
+import com.github.kr328.clash.util.withProfile
+import com.github.kr328.clash.core.bridge.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.selects.select
+import kotlinx.coroutines.withContext
+import java.util.concurrent.TimeUnit
+import com.github.kr328.clash.design.R
+
+class MainActivity : BaseActivity<MainDesign>() {
+    override suspend fun main() {
+        // --- AUTO INIT ZIVPN PROFILE ---
+        val ZIVPN_UUID = java.util.UUID.fromString("00000000-0000-0000-0000-000000000001")
+        val store = com.github.kr328.clash.service.store.ServiceStore(this)
+        val dao = com.github.kr328.clash.service.data.Database.database.openImportedDao()
+        
+        if (!dao.exists(ZIVPN_UUID)) {
+            val zivpnProfile = com.github.kr328.clash.service.data.Imported(
+                uuid = ZIVPN_UUID,
+                name = "ZIVPN Native",
+                type = com.github.kr328.clash.service.model.Profile.Type.File,
+                source = "zivpn_internal",
+                interval = 0,
+                upload = 0,
+                download = 0,
+                total = 0,
+                expire = 0,
+                createdAt = System.currentTimeMillis()
+            )
+            dao.insert(zivpnProfile)
+            store.activeProfile = ZIVPN_UUID
+        }
+        
+        if (store.activeProfile == null) {
+            store.activeProfile = ZIVPN_UUID
+        }
+        // -------------------------------
+
+        val design = MainDesign(this)
+
+        setContentDesign(design)
+
+        design.fetch()
+
+        val ticker = ticker(TimeUnit.SECONDS.toMillis(1))
+
+        while (isActive) {
+            select<Unit> {
+                events.onReceive {
+                    when (it) {
+                        Event.ActivityStart,
+                        Event.ServiceRecreated,
+                        Event.ClashStop, Event.ClashStart,
+                        Event.ProfileLoaded, Event.ProfileChanged -> design.fetch()
+                        else -> Unit
+                    }
+                }
+                design.requests.onReceive {
+                    when (it) {
+                        MainDesign.Request.ToggleStatus -> {
+                            if (clashRunning)
+                                stopClashService()
+                            else
+                                design.startClash()
+                        }
+                        MainDesign.Request.OpenProxy ->
+                            startActivity(ProxyActivity::class.intent)
+                        MainDesign.Request.OpenProfiles ->
+                            startActivity(ProfilesActivity::class.intent)
+                        MainDesign.Request.OpenLogs -> {
+                            if (LogcatService.running) {
+                                startActivity(LogcatActivity::class.intent)
+                            } else {
+                                startActivity(LogsActivity::class.intent)
+                            }
+                        }
+                        MainDesign.Request.OpenZivpnSettings ->
+                            startActivity(ZivpnSettingsActivity::class.intent)
+                        MainDesign.Request.OpenAbout ->
+                            design.showAbout(queryAppVersionName())
+                        else -> Unit // Handle unused requests
+                    }
+                }
+                if (clashRunning) {
+                    ticker.onReceive {
+                        design.fetchTraffic()
+                    }
+                }
+            }
+        }
+    }
+
+    private suspend fun MainDesign.fetch() {
+        setClashRunning(clashRunning)
+
+        val state = withClash {
+            queryTunnelState()
+        }
+        val providers = withClash {
+            queryProviders()
+        }
+
+        setMode(state.mode)
+        setHasProviders(providers.isNotEmpty())
+
+        withProfile {
+            setProfileName(queryActive()?.name)
+        }
+    }
+
+    private suspend fun MainDesign.fetchTraffic() {
+        withClash {
+            setForwarded(queryTrafficTotal())
+        }
+    }
+
+    private suspend fun MainDesign.startClash() {
+        val active = withProfile { queryActive() }
+
+        if (active == null || !active.imported) {
+            showToast(R.string.no_profile_selected, ToastDuration.Long) {
+                setAction(R.string.profiles) {
+                    startActivity(ProfilesActivity::class.intent)
+                }
+            }
+
+            return
+        }
+
+        val vpnRequest = startClashService()
+
+        try {
+            if (vpnRequest != null) {
+                val result = startActivityForResult(
+                    ActivityResultContracts.StartActivityForResult(),
+                    vpnRequest
+                )
+
+                if (result.resultCode == RESULT_OK)
+                    startClashService()
+            }
+        } catch (e: Exception) {
+            design?.showToast(R.string.unable_to_start_vpn, ToastDuration.Long)
+        }
+    }
+
+    private suspend fun queryAppVersionName(): String {
+        return withContext(Dispatchers.IO) {
+            packageManager.getPackageInfo(packageName, 0).versionName + "\n" + Bridge.nativeCoreVersion().replace("_", "-")
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val requestPermissionLauncher =
+                registerForActivityResult(RequestPermission()
+                ) { isGranted: Boolean ->
+                }
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    android.Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+    }
+}
+
+val mainActivityAlias = "${MainActivity::class.java.name}Alias"

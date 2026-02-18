@@ -1,0 +1,47 @@
+name: ZIVPN Native Build
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  BuildAPK:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Manual Clone Mihomo Core
+        run: |
+          mkdir -p core/src/foss/golang/
+          rm -rf core/src/foss/golang/clash
+          git clone --depth 1 -b Alpha https://github.com/MetaCubeX/mihomo core/src/foss/golang/clash
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: 21
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build APK (Alpha Release)
+        run: |
+          chmod +x gradlew
+          ./gradlew :app:assembleAlphaRelease --stacktrace
+
+      - name: Upload ZIVPN Native APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ZIVPN-Native-Release-APK
+          path: |
+            app/build/outputs/apk/alpha/release/*.apk
