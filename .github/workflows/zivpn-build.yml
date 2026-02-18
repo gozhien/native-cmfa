@@ -14,6 +14,12 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Manual Clone Mihomo Core
+        run: |
+          mkdir -p core/src/foss/golang/
+          rm -rf core/src/foss/golang/clash
+          git clone --depth 1 -b Alpha https://github.com/MetaCubeX/mihomo core/src/foss/golang/clash
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
@@ -23,16 +29,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.23" # Gunakan 1.23 agar lebih stabil untuk Mihomo Meta
-
-      - name: Manual Clone Mihomo Core
-        run: |
-          mkdir -p core/src/foss/golang/
-          rm -rf core/src/foss/golang/clash
-          git clone --depth 1 -b Meta https://github.com/MetaCubeX/mihomo core/src/foss/golang/clash
-          # Jalankan tidy di folder yang benar
-          cd core/src/foss/golang/clash
-          go mod tidy
+          go-version: "1.22"
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -40,19 +37,11 @@ jobs:
       - name: Build APK (Alpha Release)
         run: |
           chmod +x gradlew
-          # Membangun semua arsitektur (Arm64 dan Armv7)
           ./gradlew :app:assembleAlphaRelease --stacktrace
 
-      - name: Upload ZIVPN Native APK (Arm64)
+      - name: Upload ZIVPN Native APK
         uses: actions/upload-artifact@v4
         with:
-          name: ZIVPN-Native-Arm64-APK
-          path: app/build/outputs/apk/alpha/release/*-arm64-v8a-*.apk
-          if-no-files-found: warn
-
-      - name: Upload ZIVPN Native APK (Armv7)
-        uses: actions/upload-artifact@v4
-        with:
-          name: ZIVPN-Native-Armv7-APK
-          path: app/build/outputs/apk/alpha/release/*-armeabi-v7a-*.apk
-          if-no-files-found: warn
+          name: ZIVPN-Native-Release-APK
+          path: |
+            app/build/outputs/apk/alpha/release/*.apk
