@@ -17,16 +17,19 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.23" # Versi Go yang direkomendasikan untuk Mihomo Alpha
+          go-version: "1.23"
 
       - name: Manual Clone Mihomo Core
         run: |
           mkdir -p core/src/foss/golang/
           rm -rf core/src/foss/golang/clash
           git clone --depth 1 -b Alpha https://github.com/MetaCubeX/mihomo core/src/foss/golang/clash
-          # Perbaikan: Sinkronisasi dependency Go agar tidak error 'go mod tidy'
+          
+          # Masuk ke folder core dan perbaiki go.mod secara menyeluruh
           cd core/src/foss/golang/clash
+          go mod download
           go mod tidy
+          cd ../../../../../
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -37,15 +40,20 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      - name: Configure Gradle Properties
+        run: |
+          # Memaksa Gradle hanya menggunakan armeabi-v7a di level konfigurasi properties
+          echo "abiList=armeabi-v7a" >> gradle.properties
+          echo "android.bundle.enableUncompressedNativeLibs=false" >> gradle.properties
+
       - name: Build APK (Armv7a Only)
         run: |
           chmod +x gradlew
-          # -PabiList=armeabi-v7a digunakan untuk memfilter arsitektur build
-          ./gradlew :app:assembleAlphaRelease -PabiList=armeabi-v7a --stacktrace
+          # Menjalankan build dengan flag pembersihan dan target spesifik
+          ./gradlew clean :app:assembleAlphaRelease -PabiList=armeabi-v7a --stacktrace
 
       - name: Upload APK to Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ZIVPN-Native-Armv7a
           path: app/build/outputs/apk/alpha/release/*.apk
-          retention-days: 7 # File akan tersimpan selama 7 hari di artefak
