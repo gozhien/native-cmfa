@@ -17,14 +17,14 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.23" # Disarankan menggunakan 1.23 untuk Mihomo terbaru
+          go-version: "1.23" # Versi Go yang direkomendasikan untuk Mihomo Alpha
 
       - name: Manual Clone Mihomo Core
         run: |
           mkdir -p core/src/foss/golang/
           rm -rf core/src/foss/golang/clash
           git clone --depth 1 -b Alpha https://github.com/MetaCubeX/mihomo core/src/foss/golang/clash
-          # FIX: Jalankan go mod tidy agar go.mod sinkron
+          # Perbaikan: Sinkronisasi dependency Go agar tidak error 'go mod tidy'
           cd core/src/foss/golang/clash
           go mod tidy
 
@@ -40,12 +40,12 @@ jobs:
       - name: Build APK (Armv7a Only)
         run: |
           chmod +x gradlew
-          # Menambahkan parameter -PabiList untuk memaksa build hanya ke armeabi-v7a
+          # -PabiList=armeabi-v7a digunakan untuk memfilter arsitektur build
           ./gradlew :app:assembleAlphaRelease -PabiList=armeabi-v7a --stacktrace
 
-      - name: Upload ZIVPN Native APK
+      - name: Upload APK to Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ZIVPN-Native-Armv7a-APK
-          path: |
-            app/build/outputs/apk/alpha/release/*.apk
+          name: ZIVPN-Native-Armv7a
+          path: app/build/outputs/apk/alpha/release/*.apk
+          retention-days: 7 # File akan tersimpan selama 7 hari di artefak
