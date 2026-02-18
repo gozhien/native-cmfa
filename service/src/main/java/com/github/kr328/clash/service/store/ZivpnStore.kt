@@ -35,22 +35,22 @@ class ZivpnStore(context: Context) {
 
     var hysteriaUpMbps: String by store.string(
         key = "zivpn_hysteria_up_mbps",
-        defaultValue = "100"
+        defaultValue = "2"
     )
 
     var hysteriaDownMbps: String by store.string(
         key = "zivpn_hysteria_down_mbps",
-        defaultValue = "100"
+        defaultValue = "2"
     )
 
     var hysteriaRecvWindow: String by store.string(
         key = "zivpn_hysteria_recv_window",
-        defaultValue = "327680"
+        defaultValue = "4194304"
     )
 
     var hysteriaRecvWindowConn: String by store.string(
         key = "zivpn_hysteria_recv_window_conn",
-        defaultValue = "131072"
+        defaultValue = "262144"
     )
 
     var clashYaml: String by store.string(
