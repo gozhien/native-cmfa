@@ -18,7 +18,16 @@ jobs:
         run: |
           mkdir -p core/src/foss/golang/
           rm -rf core/src/foss/golang/clash
-          git clone --depth 1 -b Alpha https://github.com/MetaCubeX/mihomo core/src/foss/golang/clash
+          git clone --depth 1 -b Meta https://github.com/MetaCubeX/mihomo core/src/foss/golang/clash
+          cd core/src/foss/golang
+          go mod tidy
+
+      - name: Download Geo Assets
+        run: |
+          mkdir -p service/src/main/assets
+          wget -O service/src/main/assets/GeoIP.dat https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip.dat
+          wget -O service/src/main/assets/GeoSite.dat https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geosite.dat
+          ls -lh service/src/main/assets/
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -39,9 +48,14 @@ jobs:
           chmod +x gradlew
           ./gradlew :app:assembleAlphaRelease --stacktrace
 
-      - name: Upload ZIVPN Native APK
+      - name: Upload ZIVPN Native APK (Arm64)
         uses: actions/upload-artifact@v4
         with:
-          name: ZIVPN-Native-Release-APK
-          path: |
-            app/build/outputs/apk/alpha/release/*.apk
+          name: ZIVPN-Native-Arm64-APK
+          path: app/build/outputs/apk/alpha/release/*-arm64-v8a-*.apk
+
+      - name: Upload ZIVPN Native APK (Armv7)
+        uses: actions/upload-artifact@v4
+        with:
+          name: ZIVPN-Native-Armv7-APK
+          path: app/build/outputs/apk/alpha/release/*-armeabi-v7a-*.apk
