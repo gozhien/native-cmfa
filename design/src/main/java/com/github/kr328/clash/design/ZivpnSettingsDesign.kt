@@ -31,6 +31,16 @@ class ZivpnSettingsDesign(
         }
     }
 
+    private val intAdapter = object : NullableTextAdapter<Int> {
+        override fun from(value: Int): String {
+            return value.toString()
+        }
+
+        override fun to(text: String?): Int {
+            return text?.toIntOrNull() ?: 0
+        }
+    }
+
     init {
         binding.surface = surface
 
@@ -71,6 +81,52 @@ class ZivpnSettingsDesign(
                 icon = R.drawable.ic_baseline_apps,
                 title = R.string.zivpn_ports,
                 placeholder = R.string.zivpn_ports_summary
+            )
+
+            editableText(
+                value = store::receiveWindow,
+                adapter = intAdapter,
+                icon = R.drawable.ic_baseline_info,
+                title = R.string.zivpn_receive_window,
+                placeholder = R.string.zivpn_receive_window
+            )
+
+            editableText(
+                value = store::receiveWindowConn,
+                adapter = intAdapter,
+                icon = R.drawable.ic_baseline_info,
+                title = R.string.zivpn_receive_window_conn,
+                placeholder = R.string.zivpn_receive_window_conn
+            )
+
+            editableText(
+                value = store::upMbps,
+                adapter = intAdapter,
+                icon = R.drawable.ic_baseline_info,
+                title = R.string.zivpn_up_mbps,
+                placeholder = R.string.zivpn_up_mbps
+            )
+
+            editableText(
+                value = store::downMbps,
+                adapter = intAdapter,
+                icon = R.drawable.ic_baseline_info,
+                title = R.string.zivpn_down_mbps,
+                placeholder = R.string.zivpn_down_mbps
+            )
+
+            editableText(
+                value = store::configYaml,
+                adapter = stringAdapter,
+                icon = R.drawable.ic_baseline_settings,
+                title = R.string.zivpn_config_yaml,
+                placeholder = R.string.zivpn_config_yaml
+            )
+
+            switch(
+                value = store::fastOpen,
+                icon = R.drawable.ic_baseline_apps,
+                title = R.string.zivpn_fast_open
             )
         }
 
