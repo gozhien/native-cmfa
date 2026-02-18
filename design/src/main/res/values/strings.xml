@@ -361,4 +361,5 @@
     <string name="zivpn_up_mbps">Upload Mbps</string>
     <string name="zivpn_down_mbps">Download Mbps</string>
     <string name="zivpn_config_yaml">Config YAML</string>
+    <string name="zivpn_fast_open">Fast Open</string>
 </resources>

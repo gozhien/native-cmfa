@@ -122,6 +122,12 @@ class ZivpnSettingsDesign(
                 title = R.string.zivpn_config_yaml,
                 placeholder = R.string.zivpn_config_yaml
             )
+
+            switch(
+                value = store::fastOpen,
+                icon = R.drawable.ic_baseline_speed,
+                title = R.string.zivpn_fast_open
+            )
         }
 
         binding.content.addView(screen.root)

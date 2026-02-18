@@ -57,4 +57,9 @@ class ZivpnStore(context: Context) {
         key = "zivpn_config_yaml",
         defaultValue = ""
     )
+
+    var fastOpen: Boolean by store.boolean(
+        key = "zivpn_fast_open",
+        defaultValue = true
+    )
 }
