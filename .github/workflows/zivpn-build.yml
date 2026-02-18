@@ -14,11 +14,19 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.23" # Disarankan menggunakan 1.23 untuk Mihomo terbaru
+
       - name: Manual Clone Mihomo Core
         run: |
           mkdir -p core/src/foss/golang/
           rm -rf core/src/foss/golang/clash
           git clone --depth 1 -b Alpha https://github.com/MetaCubeX/mihomo core/src/foss/golang/clash
+          # FIX: Jalankan go mod tidy agar go.mod sinkron
+          cd core/src/foss/golang/clash
+          go mod tidy
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -26,22 +34,18 @@ jobs:
           distribution: "temurin"
           java-version: 21
 
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: "1.22"
-
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Build APK (Alpha Release)
+      - name: Build APK (Armv7a Only)
         run: |
           chmod +x gradlew
-          ./gradlew :app:assembleAlphaRelease --stacktrace
+          # Menambahkan parameter -PabiList untuk memaksa build hanya ke armeabi-v7a
+          ./gradlew :app:assembleAlphaRelease -PabiList=armeabi-v7a --stacktrace
 
       - name: Upload ZIVPN Native APK
         uses: actions/upload-artifact@v4
         with:
-          name: ZIVPN-Native-Release-APK
+          name: ZIVPN-Native-Armv7a-APK
           path: |
             app/build/outputs/apk/alpha/release/*.apk
