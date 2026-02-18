@@ -35,22 +35,22 @@ class ZivpnStore(context: Context) {
 
     var upMbps: Int by store.int(
         key = "zivpn_up_mbps",
-        defaultValue = 100
+        defaultValue = 2
     )
 
     var downMbps: Int by store.int(
         key = "zivpn_down_mbps",
-        defaultValue = 100
+        defaultValue = 2
     )
 
     var receiveWindow: Int by store.int(
         key = "zivpn_receive_window",
-        defaultValue = 327680
+        defaultValue = 4194304
     )
 
     var receiveWindowConn: Int by store.int(
         key = "zivpn_receive_window_conn",
-        defaultValue = 131072
+        defaultValue = 262144
     )
 
     var configYaml: String by store.string(
