@@ -125,7 +125,7 @@ class ZivpnSettingsDesign(
 
             switch(
                 value = store::fastOpen,
-                icon = R.drawable.ic_baseline_speed,
+                icon = R.drawable.ic_baseline_apps,
                 title = R.string.zivpn_fast_open
             )
         }
