@@ -31,6 +31,16 @@ class ZivpnSettingsDesign(
         }
     }
 
+    private val intAdapter = object : NullableTextAdapter<Int> {
+        override fun from(value: Int): String {
+            return value.toString()
+        }
+
+        override fun to(text: String?): Int {
+            return text?.toIntOrNull() ?: 0
+        }
+    }
+
     init {
         binding.surface = surface
 
@@ -71,6 +81,46 @@ class ZivpnSettingsDesign(
                 icon = R.drawable.ic_baseline_apps,
                 title = R.string.zivpn_ports,
                 placeholder = R.string.zivpn_ports_summary
+            )
+
+            editableText(
+                value = store::receiveWindow,
+                adapter = intAdapter,
+                icon = R.drawable.ic_baseline_reorder,
+                title = R.string.zivpn_recv_window,
+                placeholder = R.string.zivpn_recv_window
+            )
+
+            editableText(
+                value = store::receiveWindowConn,
+                adapter = intAdapter,
+                icon = R.drawable.ic_baseline_reorder,
+                title = R.string.zivpn_recv_window_conn,
+                placeholder = R.string.zivpn_recv_window_conn
+            )
+
+            editableText(
+                value = store::up,
+                adapter = intAdapter,
+                icon = R.drawable.ic_baseline_arrow_upward,
+                title = R.string.zivpn_up,
+                placeholder = R.string.zivpn_up
+            )
+
+            editableText(
+                value = store::down,
+                adapter = intAdapter,
+                icon = R.drawable.ic_baseline_arrow_downward,
+                title = R.string.zivpn_down,
+                placeholder = R.string.zivpn_down
+            )
+
+            editableText(
+                value = store::clashYaml,
+                adapter = stringAdapter,
+                icon = R.drawable.ic_baseline_settings,
+                title = R.string.zivpn_yaml,
+                placeholder = R.string.zivpn_yaml
             )
         }
 

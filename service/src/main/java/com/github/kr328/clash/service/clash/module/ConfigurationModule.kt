@@ -81,7 +81,11 @@ class ConfigurationModule(service: Service) : Module<ConfigurationModule.LoadExc
                 
                 // 2. FORCE WRITE Valid Config (Reset every time)
                 val configFile = profileDir.resolve("config.yaml")
-                val zivpnConfig = """
+
+                val zivpnStore = com.github.kr328.clash.service.store.ZivpnStore(service)
+                val userYaml = zivpnStore.clashYaml
+
+                val zivpnConfig = if (userYaml.isNotBlank()) userYaml else """
 mixed-port: 7890
 allow-lan: false
 mode: rule
