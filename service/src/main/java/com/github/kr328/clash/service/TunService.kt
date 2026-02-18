@@ -130,7 +130,12 @@ class TunService : VpnService(), CoroutineScope by CoroutineScope(Dispatchers.De
                 val port = ports[i]
                 val range = if (i < ranges.size) ranges[i] else zivpnStore.portRanges // Fallback to full range
                 
-                val configContent = """{"server":"$serverHost:$range","obfs":"$obfs","auth":"$pass","socks5":{"listen":"127.0.0.1:$port"},"insecure":true,"recvwindowconn":131072,"recvwindow":327680}"""
+                val upMbps = zivpnStore.upMbps
+                val downMbps = zivpnStore.downMbps
+                val recvWindow = zivpnStore.receiveWindow
+                val recvWindowConn = zivpnStore.receiveWindowConn
+
+                val configContent = """{"server":"$serverHost:$range","obfs":"$obfs","auth":"$pass","socks5":{"listen":"127.0.0.1:$port"},"insecure":true,"recv_window_conn":$recvWindowConn,"recv_window":$recvWindow,"up_mbps":$upMbps,"down_mbps":$downMbps}"""
                 
                 val pb = ProcessBuilder(libUz, "-s", obfs, "--config", configContent)
                 pb.environment()["LD_LIBRARY_PATH"] = nativeDir

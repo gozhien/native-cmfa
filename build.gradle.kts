@@ -68,7 +68,7 @@ subprojects {
 
             externalNativeBuild {
                 cmake {
-                    abiFilters("arm64-v8a")
+                    abiFilters("arm64-v8a", "armeabi-v7a")
                 }
             }
 
@@ -200,7 +200,7 @@ subprojects {
                     isEnable = true
                     isUniversalApk = false
                     reset()
-                    include("arm64-v8a")
+                    include("arm64-v8a", "armeabi-v7a")
                 }
             }
         }
