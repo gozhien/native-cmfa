@@ -68,8 +68,8 @@ class ZivpnStore(context: Context) {
     private fun migrate(oldKey: String, newKey: String) {
         val oldValue = store.provider.getString(oldKey, "")
         if (oldValue.isNotEmpty()) {
-            val newValue = store.provider.getString(newKey, "")
-            if (newValue.isEmpty()) {
+            val newValue = store.provider.getString(newKey, "__NOT_SET__")
+            if (newValue == "__NOT_SET__") {
                 store.provider.setString(newKey, oldValue)
             }
         }
