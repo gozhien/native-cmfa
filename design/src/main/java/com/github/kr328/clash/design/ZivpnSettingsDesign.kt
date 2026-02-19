@@ -101,7 +101,7 @@ class ZivpnSettingsDesign(
 
             editableText(
                 value = store::up,
-                adapter = intAdapter,
+                adapter = stringAdapter,
                 icon = R.drawable.ic_baseline_info,
                 title = R.string.zivpn_up,
                 placeholder = R.string.zivpn_up
@@ -109,7 +109,7 @@ class ZivpnSettingsDesign(
 
             editableText(
                 value = store::down,
-                adapter = intAdapter,
+                adapter = stringAdapter,
                 icon = R.drawable.ic_baseline_info,
                 title = R.string.zivpn_down,
                 placeholder = R.string.zivpn_down

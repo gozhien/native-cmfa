@@ -33,14 +33,14 @@ class ZivpnStore(context: Context) {
         defaultValue = "6000-7750,7751-9500,9501-11250,11251-13000,13001-14750,14751-16500,16501-18250,18251-19999"
     )
 
-    var up: Int by store.int(
+    var up: String by store.string(
         key = "zivpn_up",
-        defaultValue = 2
+        defaultValue = "2 Mbps"
     )
 
-    var down: Int by store.int(
+    var down: String by store.string(
         key = "zivpn_down",
-        defaultValue = 2
+        defaultValue = "2 Mbps"
     )
 
     var recvwindow: Int by store.int(
