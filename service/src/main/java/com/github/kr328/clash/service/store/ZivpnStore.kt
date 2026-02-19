@@ -33,28 +33,45 @@ class ZivpnStore(context: Context) {
         defaultValue = "6000-7750,7751-9500,9501-11250,11251-13000,13001-14750,14751-16500,16501-18250,18251-19999"
     )
 
-    var hysteriaReceiveWindow: String by store.string(
-        key = "zivpn_hysteria_receive_window",
-        defaultValue = "327680"
+    var recvwindow: String by store.string(
+        key = "zivpn_recvwindow",
+        defaultValue = "3145728"
     )
 
-    var hysteriaRecvWindowConn: String by store.string(
-        key = "zivpn_hysteria_recv_window_conn",
-        defaultValue = "131072"
+    var recvwindowconn: String by store.string(
+        key = "zivpn_recvwindowconn",
+        defaultValue = "12582912"
     )
 
-    var hysteriaUp: String by store.string(
-        key = "zivpn_hysteria_up",
-        defaultValue = ""
+    var up: String by store.string(
+        key = "zivpn_up",
+        defaultValue = "1 mbps"
     )
 
-    var hysteriaDown: String by store.string(
-        key = "zivpn_hysteria_down",
-        defaultValue = ""
+    var down: String by store.string(
+        key = "zivpn_down",
+        defaultValue = "3 mbps"
     )
 
     var clashYaml: String by store.string(
         key = "zivpn_clash_yaml",
         defaultValue = ""
     )
+
+    init {
+        migrate("zivpn_hysteria_up", "zivpn_up")
+        migrate("zivpn_hysteria_down", "zivpn_down")
+        migrate("zivpn_hysteria_receive_window", "zivpn_recvwindow")
+        migrate("zivpn_hysteria_recv_window_conn", "zivpn_recvwindowconn")
+    }
+
+    private fun migrate(oldKey: String, newKey: String) {
+        val oldValue = store.provider.getString(oldKey, "")
+        if (oldValue.isNotEmpty()) {
+            val newValue = store.provider.getString(newKey, "")
+            if (newValue.isEmpty()) {
+                store.provider.setString(newKey, oldValue)
+            }
+        }
+    }
 }

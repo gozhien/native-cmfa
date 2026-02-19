@@ -74,7 +74,7 @@ class ZivpnSettingsDesign(
             )
 
             editableText(
-                value = store::hysteriaReceiveWindow,
+                value = store::recvwindow,
                 adapter = stringAdapter,
                 icon = R.drawable.ic_baseline_info,
                 title = R.string.zivpn_recv_window,
@@ -82,7 +82,7 @@ class ZivpnSettingsDesign(
             )
 
             editableText(
-                value = store::hysteriaRecvWindowConn,
+                value = store::recvwindowconn,
                 adapter = stringAdapter,
                 icon = R.drawable.ic_baseline_info,
                 title = R.string.zivpn_recv_window_conn,
@@ -90,7 +90,7 @@ class ZivpnSettingsDesign(
             )
 
             editableText(
-                value = store::hysteriaUp,
+                value = store::up,
                 adapter = stringAdapter,
                 icon = R.drawable.ic_baseline_info,
                 title = R.string.zivpn_up,
@@ -98,7 +98,7 @@ class ZivpnSettingsDesign(
             )
 
             editableText(
-                value = store::hysteriaDown,
+                value = store::down,
                 adapter = stringAdapter,
                 icon = R.drawable.ic_baseline_info,
                 title = R.string.zivpn_down,
