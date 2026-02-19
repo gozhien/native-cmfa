@@ -27,27 +27,28 @@ class ZivpnProfilesActivity : BaseActivity<ZivpnProfilesDesign>() {
                         when (request) {
                             is ZivpnProfilesDesign.Request.Add -> {
                                 showEditDialog(null) { newProfile ->
-                                    launch(Dispatchers.Main) {
-                                        try {
-                                            Log.d("ZIVPN: Adding new profile: ${newProfile.name}")
-                                            store.profiles = store.profiles + newProfile
-                                            design.updateList()
-                                        } catch (e: Exception) {
-                                            Log.e("ZIVPN: Failed to add profile", e)
+                                    try {
+                                        Log.d("ZIVPN: Adding new profile: ${newProfile.name}")
+                                        store.profiles = store.profiles + newProfile
+                                        design.updateList()
+                                        launch {
+                                            design.showToast(R.string.save, com.github.kr328.clash.design.ui.ToastDuration.Short)
                                         }
+                                    } catch (e: Exception) {
+                                        Log.e("ZIVPN: Failed to add profile", e)
                                     }
                                 }
                             }
                             is ZivpnProfilesDesign.Request.Select -> {
                                 showProfileMenu(request.profile) { action ->
-                                    launch(Dispatchers.Main) {
-                                        try {
-                                            when (action) {
-                                                "use" -> {
-                                                    Log.d("ZIVPN: Using profile ${request.profile.name}: host=${request.profile.host}, pass=***")
-                                                    store.serverHost = request.profile.host
-                                                    store.serverPass = request.profile.pass
+                                    try {
+                                        when (action) {
+                                            "use" -> {
+                                                Log.d("ZIVPN: Using profile ${request.profile.name}: host=${request.profile.host}, pass=***")
+                                                store.serverHost = request.profile.host
+                                                store.serverPass = request.profile.pass
 
+                                                launch {
                                                     design.showToast(
                                                         getString(
                                                             R.string.format_profile_activated,
@@ -56,43 +57,39 @@ class ZivpnProfilesActivity : BaseActivity<ZivpnProfilesDesign>() {
                                                         com.github.kr328.clash.design.ui.ToastDuration.Short
                                                     )
                                                 }
+                                            }
 
-                                                "edit" -> {
-                                                    showEditDialog(request.profile) { editedProfile ->
-                                                        launch(Dispatchers.Main) {
-                                                            try {
-                                                                Log.d("ZIVPN: Editing profile at index ${request.index}: ${editedProfile.name}")
-                                                                val profiles =
-                                                                    store.profiles.toMutableList()
-                                                                profiles[request.index] =
-                                                                    editedProfile
-                                                                store.profiles = profiles
-                                                                design.updateList()
-                                                            } catch (e: Exception) {
-                                                                Log.e(
-                                                                    "ZIVPN: Failed to edit profile",
-                                                                    e
-                                                                )
-                                                            }
-                                                        }
-                                                    }
-                                                }
-
-                                                "delete" -> {
+                                            "edit" -> {
+                                                showEditDialog(request.profile) { editedProfile ->
                                                     try {
-                                                        Log.d("ZIVPN: Deleting profile at index ${request.index}")
+                                                        Log.d("ZIVPN: Editing profile at index ${request.index}: ${editedProfile.name}")
                                                         val profiles = store.profiles.toMutableList()
-                                                        profiles.removeAt(request.index)
+                                                        profiles[request.index] = editedProfile
                                                         store.profiles = profiles
                                                         design.updateList()
+                                                        launch {
+                                                            design.showToast(R.string.save, com.github.kr328.clash.design.ui.ToastDuration.Short)
+                                                        }
                                                     } catch (e: Exception) {
-                                                        Log.e("ZIVPN: Failed to delete profile", e)
+                                                        Log.e("ZIVPN: Failed to edit profile", e)
                                                     }
                                                 }
                                             }
-                                        } catch (e: Exception) {
-                                            Log.e("ZIVPN: Failed to handle profile selection", e)
+
+                                            "delete" -> {
+                                                try {
+                                                    Log.d("ZIVPN: Deleting profile at index ${request.index}")
+                                                    val profiles = store.profiles.toMutableList()
+                                                    profiles.removeAt(request.index)
+                                                    store.profiles = profiles
+                                                    design.updateList()
+                                                } catch (e: Exception) {
+                                                    Log.e("ZIVPN: Failed to delete profile", e)
+                                                }
+                                            }
                                         }
+                                    } catch (e: Exception) {
+                                        Log.e("ZIVPN: Failed to handle profile selection", e)
                                     }
                                 }
                             }

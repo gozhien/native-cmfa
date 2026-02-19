@@ -17,6 +17,12 @@ class ZivpnStore(context: Context) {
             .asStoreProvider()
     )
 
+    private val json = Json {
+        ignoreUnknownKeys = true
+        encodeDefaults = true
+        isLenient = true
+    }
+
     var serverHost: String by store.string(
         key = "zivpn_server_host",
         defaultValue = ""
@@ -70,10 +76,11 @@ class ZivpnStore(context: Context) {
 
     var profiles: List<HysteriaProfile>
         get() = try {
+            Log.d("ZIVPN: Loading profiles, raw JSON: $profilesJson")
             if (profilesJson.isEmpty() || profilesJson == "null") {
                 emptyList()
             } else {
-                val decoded = Json.decodeFromString<List<HysteriaProfile>>(profilesJson)
+                val decoded = json.decodeFromString<List<HysteriaProfile>>(profilesJson)
                 Log.d("ZIVPN: Loaded ${decoded.size} profiles from store")
                 decoded
             }
@@ -83,8 +90,9 @@ class ZivpnStore(context: Context) {
         }
         set(value) {
             try {
-                profilesJson = Json.encodeToString(value)
-                Log.d("ZIVPN: Saved ${value.size} profiles to store")
+                val encoded = json.encodeToString(value)
+                profilesJson = encoded
+                Log.d("ZIVPN: Saved ${value.size} profiles to store, raw JSON: $encoded")
             } catch (e: Exception) {
                 Log.e("ZIVPN: Failed to encode profiles", e)
             }
