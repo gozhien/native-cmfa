@@ -136,7 +136,7 @@ class TunService : VpnService(), CoroutineScope by CoroutineScope(Dispatchers.De
                 val recvwindowconn = zivpnStore.recvwindowconn
                 val fastOpen = zivpnStore.fastOpen
 
-                val configContent = """{"server":"$serverHost:$range","obfs":"$obfs","auth":"$pass","socks5":{"listen":"127.0.0.1:$port"},"insecure":true,"up":$up,"down":$down,"recvwindow":$recvwindow,"recvwindowconn":$recvwindowconn,"fastOpen":$fastOpen,"transport":{"up":$up,"down":$down,"recvwindow":$recvwindow,"recvwindowconn":$recvwindowconn}}"""
+                val configContent = """{"server":"$serverHost:$range","obfs":"$obfs","auth":"$pass","socks5":{"listen":"127.0.0.1:$port"},"insecure":true,"up":$up,"down":$down,"recvwindow":$recvwindow,"recvwindowconn":$recvwindowconn,"fastOpen":$fastOpen}"""
                 
                 val pb = ProcessBuilder(libUz, "-s", obfs, "--config", configContent)
                 pb.environment()["LD_LIBRARY_PATH"] = nativeDir
