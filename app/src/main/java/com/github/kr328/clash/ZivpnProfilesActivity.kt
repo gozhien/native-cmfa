@@ -29,6 +29,7 @@ class ZivpnProfilesActivity : BaseActivity<ZivpnProfilesDesign>() {
                                 showEditDialog(null) { newProfile ->
                                     launch(Dispatchers.Main) {
                                         try {
+                                            Log.d("ZIVPN: Adding new profile: ${newProfile.name}")
                                             store.profiles = store.profiles + newProfile
                                             design.updateList()
                                         } catch (e: Exception) {
@@ -43,6 +44,7 @@ class ZivpnProfilesActivity : BaseActivity<ZivpnProfilesDesign>() {
                                         try {
                                             when (action) {
                                                 "use" -> {
+                                                    Log.d("ZIVPN: Using profile ${request.profile.name}: host=${request.profile.host}, pass=***")
                                                     store.serverHost = request.profile.host
                                                     store.serverPass = request.profile.pass
 
@@ -59,6 +61,7 @@ class ZivpnProfilesActivity : BaseActivity<ZivpnProfilesDesign>() {
                                                     showEditDialog(request.profile) { editedProfile ->
                                                         launch(Dispatchers.Main) {
                                                             try {
+                                                                Log.d("ZIVPN: Editing profile at index ${request.index}: ${editedProfile.name}")
                                                                 val profiles =
                                                                     store.profiles.toMutableList()
                                                                 profiles[request.index] =
@@ -77,6 +80,7 @@ class ZivpnProfilesActivity : BaseActivity<ZivpnProfilesDesign>() {
 
                                                 "delete" -> {
                                                     try {
+                                                        Log.d("ZIVPN: Deleting profile at index ${request.index}")
                                                         val profiles = store.profiles.toMutableList()
                                                         profiles.removeAt(request.index)
                                                         store.profiles = profiles
@@ -118,15 +122,24 @@ class ZivpnProfilesActivity : BaseActivity<ZivpnProfilesDesign>() {
                 val hostRaw = binding.hostField.text.toString().trim()
                 val pass = binding.passField.text.toString().trim()
 
-                val host = if (hostRaw.contains('[') && hostRaw.contains(']')) {
-                    if (hostRaw.substringAfterLast(']').contains(':'))
-                        hostRaw.substringBeforeLast(':')
-                    else hostRaw
+                // Robust port stripping while preserving IPv6
+                val host = if (hostRaw.startsWith("[") && hostRaw.contains("]")) {
+                    // IPv6 address
+                    val closingBracketIndex = hostRaw.indexOf(']')
+                    val suffix = hostRaw.substring(closingBracketIndex + 1)
+                    if (suffix.startsWith(":")) {
+                        hostRaw.substring(0, closingBracketIndex + 1)
+                    } else {
+                        hostRaw
+                    }
                 } else if (hostRaw.count { it == ':' } == 1) {
+                    // IPv4:port or domain:port
                     hostRaw.substringBefore(':')
                 } else {
                     hostRaw
                 }
+
+                Log.d("ZIVPN: Profile dialog OK: name=$name, hostRaw=$hostRaw, hostStripped=$host")
 
                 if (name.isNotBlank() && host.isNotBlank()) {
                     onSave(HysteriaProfile(name, host, pass))

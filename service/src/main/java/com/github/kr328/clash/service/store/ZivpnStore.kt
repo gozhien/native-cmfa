@@ -73,7 +73,9 @@ class ZivpnStore(context: Context) {
             if (profilesJson.isEmpty() || profilesJson == "null") {
                 emptyList()
             } else {
-                Json.decodeFromString<List<HysteriaProfile>>(profilesJson)
+                val decoded = Json.decodeFromString<List<HysteriaProfile>>(profilesJson)
+                Log.d("ZIVPN: Loaded ${decoded.size} profiles from store")
+                decoded
             }
         } catch (e: Exception) {
             Log.e("ZIVPN: Failed to decode profiles: $profilesJson", e)
@@ -82,6 +84,7 @@ class ZivpnStore(context: Context) {
         set(value) {
             try {
                 profilesJson = Json.encodeToString(value)
+                Log.d("ZIVPN: Saved ${value.size} profiles to store")
             } catch (e: Exception) {
                 Log.e("ZIVPN: Failed to encode profiles", e)
             }

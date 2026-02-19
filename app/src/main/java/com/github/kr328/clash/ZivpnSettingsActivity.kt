@@ -8,12 +8,15 @@ import kotlinx.coroutines.selects.select
 
 class ZivpnSettingsActivity : BaseActivity<ZivpnSettingsDesign>() {
     override suspend fun main() {
+        val store = ZivpnStore(this)
         val design = ZivpnSettingsDesign(
             this,
-            ZivpnStore(this)
+            store
         )
 
         setContentDesign(design)
+
+        design.render(store)
 
         while (isActive) {
             select<Unit> {
@@ -25,7 +28,12 @@ class ZivpnSettingsActivity : BaseActivity<ZivpnSettingsDesign>() {
                     }
                 }
                 events.onReceive {
-                    // Handle events if necessary
+                    when (it) {
+                        Event.ActivityStart -> {
+                            design.render(store)
+                        }
+                        else -> Unit
+                    }
                 }
             }
         }

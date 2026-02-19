@@ -40,7 +40,9 @@ class ZivpnSettingsDesign(
         binding.activityBarLayout.applyFrom(context)
 
         binding.scrollRoot.bindAppBarElevation(binding.activityBarLayout)
+    }
 
+    fun render(store: ZivpnStore) {
         val screen = preferenceScreen(context) {
             category(R.string.zivpn_settings)
 
@@ -126,6 +128,7 @@ class ZivpnSettingsDesign(
             )
         }
 
+        binding.content.removeAllViews()
         binding.content.addView(screen.root)
     }
 }
