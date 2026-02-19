@@ -1,11 +1,13 @@
 package com.github.kr328.clash
 
+import com.github.kr328.clash.common.log.Log
 import com.github.kr328.clash.design.ZivpnProfilesDesign
 import com.github.kr328.clash.design.databinding.DialogZivpnProfileBinding
 import com.github.kr328.clash.design.util.layoutInflater
 import com.github.kr328.clash.service.model.HysteriaProfile
 import com.github.kr328.clash.service.store.ZivpnStore
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.selects.select
@@ -21,41 +23,78 @@ class ZivpnProfilesActivity : BaseActivity<ZivpnProfilesDesign>() {
         while (isActive) {
             select<Unit> {
                 design.requests.onReceive { request ->
-                    when (request) {
-                        is ZivpnProfilesDesign.Request.Add -> {
-                            showEditDialog(null) { newProfile ->
-                                store.profiles = store.profiles + newProfile
-                                design.updateList()
-                            }
-                        }
-                        is ZivpnProfilesDesign.Request.Select -> {
-                            showProfileMenu(request.profile) { action ->
-                                when (action) {
-                                    "use" -> {
-                                        store.serverHost = request.profile.host
-                                        store.serverPass = request.profile.pass
-                                        launch {
-                                            design.showToast(getString(R.string.format_profile_activated, request.profile.name), com.github.kr328.clash.design.ui.ToastDuration.Short)
-                                        }
-                                    }
-                                    "edit" -> {
-                                        showEditDialog(request.profile) { editedProfile ->
-                                            val profiles = store.profiles.toMutableList()
-                                            profiles[request.index] = editedProfile
-                                            store.profiles = profiles
+                    try {
+                        when (request) {
+                            is ZivpnProfilesDesign.Request.Add -> {
+                                showEditDialog(null) { newProfile ->
+                                    launch(Dispatchers.Main) {
+                                        try {
+                                            store.profiles = store.profiles + newProfile
                                             design.updateList()
+                                        } catch (e: Exception) {
+                                            Log.e("ZIVPN: Failed to add profile", e)
                                         }
                                     }
-                                    "delete" -> {
-                                        val profiles = store.profiles.toMutableList()
-                                        profiles.removeAt(request.index)
-                                        store.profiles = profiles
-                                        design.updateList()
+                                }
+                            }
+                            is ZivpnProfilesDesign.Request.Select -> {
+                                showProfileMenu(request.profile) { action ->
+                                    launch(Dispatchers.Main) {
+                                        try {
+                                            when (action) {
+                                                "use" -> {
+                                                    store.serverHost = request.profile.host
+                                                    store.serverPass = request.profile.pass
+
+                                                    design.showToast(
+                                                        getString(
+                                                            R.string.format_profile_activated,
+                                                            request.profile.name
+                                                        ),
+                                                        com.github.kr328.clash.design.ui.ToastDuration.Short
+                                                    )
+                                                }
+
+                                                "edit" -> {
+                                                    showEditDialog(request.profile) { editedProfile ->
+                                                        launch(Dispatchers.Main) {
+                                                            try {
+                                                                val profiles =
+                                                                    store.profiles.toMutableList()
+                                                                profiles[request.index] =
+                                                                    editedProfile
+                                                                store.profiles = profiles
+                                                                design.updateList()
+                                                            } catch (e: Exception) {
+                                                                Log.e(
+                                                                    "ZIVPN: Failed to edit profile",
+                                                                    e
+                                                                )
+                                                            }
+                                                        }
+                                                    }
+                                                }
+
+                                                "delete" -> {
+                                                    try {
+                                                        val profiles = store.profiles.toMutableList()
+                                                        profiles.removeAt(request.index)
+                                                        store.profiles = profiles
+                                                        design.updateList()
+                                                    } catch (e: Exception) {
+                                                        Log.e("ZIVPN: Failed to delete profile", e)
+                                                    }
+                                                }
+                                            }
+                                        } catch (e: Exception) {
+                                            Log.e("ZIVPN: Failed to handle profile selection", e)
+                                        }
                                     }
                                 }
                             }
                         }
-                        else -> Unit
+                    } catch (e: Exception) {
+                        Log.e("ZIVPN: Error processing profile request", e)
                     }
                 }
             }
@@ -71,13 +110,24 @@ class ZivpnProfilesActivity : BaseActivity<ZivpnProfilesDesign>() {
             binding.passField.setText(it.pass)
         }
 
-        MaterialAlertDialogBuilder(this)
+        MaterialAlertDialogBuilder(this@ZivpnProfilesActivity)
             .setTitle(if (profile == null) R.string.zivpn_add_profile else R.string.zivpn_edit_profile)
             .setView(binding.root)
             .setPositiveButton(R.string.ok) { _, _ ->
-                val name = binding.nameField.text.toString()
-                val host = binding.hostField.text.toString()
-                val pass = binding.passField.text.toString()
+                val name = binding.nameField.text.toString().trim()
+                val hostRaw = binding.hostField.text.toString().trim()
+                val pass = binding.passField.text.toString().trim()
+
+                val host = if (hostRaw.contains('[') && hostRaw.contains(']')) {
+                    if (hostRaw.substringAfterLast(']').contains(':'))
+                        hostRaw.substringBeforeLast(':')
+                    else hostRaw
+                } else if (hostRaw.count { it == ':' } == 1) {
+                    hostRaw.substringBefore(':')
+                } else {
+                    hostRaw
+                }
+
                 if (name.isNotBlank() && host.isNotBlank()) {
                     onSave(HysteriaProfile(name, host, pass))
                 }
@@ -94,7 +144,7 @@ class ZivpnProfilesActivity : BaseActivity<ZivpnProfilesDesign>() {
         )
         val actions = arrayOf("use", "edit", "delete")
 
-        MaterialAlertDialogBuilder(this)
+        MaterialAlertDialogBuilder(this@ZivpnProfilesActivity)
             .setTitle(profile.name)
             .setItems(options) { _, which ->
                 onAction(actions[which])

@@ -1,6 +1,7 @@
 package com.github.kr328.clash.service.store
 
 import android.content.Context
+import com.github.kr328.clash.common.log.Log
 import com.github.kr328.clash.common.store.Store
 import com.github.kr328.clash.common.store.asStoreProvider
 import com.github.kr328.clash.service.PreferenceProvider
@@ -69,12 +70,21 @@ class ZivpnStore(context: Context) {
 
     var profiles: List<HysteriaProfile>
         get() = try {
-            Json.decodeFromString<List<HysteriaProfile>>(profilesJson)
+            if (profilesJson.isEmpty() || profilesJson == "null") {
+                emptyList()
+            } else {
+                Json.decodeFromString<List<HysteriaProfile>>(profilesJson)
+            }
         } catch (e: Exception) {
+            Log.e("ZIVPN: Failed to decode profiles: $profilesJson", e)
             emptyList()
         }
         set(value) {
-            profilesJson = Json.encodeToString(value)
+            try {
+                profilesJson = Json.encodeToString(value)
+            } catch (e: Exception) {
+                Log.e("ZIVPN: Failed to encode profiles", e)
+            }
         }
 
     init {
