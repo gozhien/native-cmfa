@@ -361,4 +361,12 @@
     <string name="zivpn_up">Upload Speed (e.g. 50 Mbps)</string>
     <string name="zivpn_down">Download Speed (e.g. 50 Mbps)</string>
     <string name="zivpn_clash_yaml">Clash YAML Config</string>
+    <string name="zivpn_profiles">Hysteria Profiles</string>
+    <string name="zivpn_profile_name">Profile Name</string>
+    <string name="zivpn_profile_host">Host:Port</string>
+    <string name="zivpn_profile_pass">Password / Auth</string>
+    <string name="zivpn_add_profile">Add Profile</string>
+    <string name="zivpn_edit_profile">Edit Profile</string>
+    <string name="zivpn_delete_profile">Delete Profile</string>
+    <string name="zivpn_use_profile">Use Profile</string>
 </resources>

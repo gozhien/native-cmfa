@@ -129,6 +129,11 @@
             android:configChanges="uiMode"
             android:exported="false"
             android:label="@string/zivpn_settings" />
+        <activity
+            android:name=".ZivpnProfilesActivity"
+            android:configChanges="uiMode"
+            android:exported="false"
+            android:label="@string/zivpn_profiles" />
 
         <service
             android:name=".LogcatService"

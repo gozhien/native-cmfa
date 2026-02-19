@@ -13,7 +13,10 @@ import com.github.kr328.clash.service.store.ZivpnStore
 class ZivpnSettingsDesign(
     context: Context,
     store: ZivpnStore,
-) : Design<Unit>(context) {
+) : Design<ZivpnSettingsDesign.Request>(context) {
+    sealed class Request {
+        object OpenProfiles : Request()
+    }
 
     private val binding = DesignSettingsCommonBinding
         .inflate(context.layoutInflater, context.root, false)
@@ -40,6 +43,15 @@ class ZivpnSettingsDesign(
 
         val screen = preferenceScreen(context) {
             category(R.string.zivpn_settings)
+
+            clickable(
+                title = R.string.zivpn_profiles,
+                icon = R.drawable.ic_baseline_vpn_lock,
+            ) {
+                clicked {
+                    requests.trySend(Request.OpenProfiles)
+                }
+            }
 
             editableText(
                 value = store::serverHost,

@@ -4,6 +4,10 @@ import android.content.Context
 import com.github.kr328.clash.common.store.Store
 import com.github.kr328.clash.common.store.asStoreProvider
 import com.github.kr328.clash.service.PreferenceProvider
+import com.github.kr328.clash.service.model.HysteriaProfile
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 class ZivpnStore(context: Context) {
     private val store = Store(
@@ -57,6 +61,21 @@ class ZivpnStore(context: Context) {
         key = "zivpn_clash_yaml",
         defaultValue = ""
     )
+
+    var profilesJson: String by store.string(
+        key = "zivpn_profiles",
+        defaultValue = "[]"
+    )
+
+    var profiles: List<HysteriaProfile>
+        get() = try {
+            Json.decodeFromString<List<HysteriaProfile>>(profilesJson)
+        } catch (e: Exception) {
+            emptyList()
+        }
+        set(value) {
+            profilesJson = Json.encodeToString(value)
+        }
 
     init {
         migrate("zivpn_hysteria_up", "zivpn_up")
