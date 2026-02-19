@@ -33,23 +33,23 @@ class ZivpnStore(context: Context) {
         defaultValue = "6000-7750,7751-9500,9501-11250,11251-13000,13001-14750,14751-16500,16501-18250,18251-19999"
     )
 
-    var upMbps: Int by store.int(
-        key = "zivpn_up_mbps",
+    var up: Int by store.int(
+        key = "zivpn_up",
         defaultValue = 2
     )
 
-    var downMbps: Int by store.int(
-        key = "zivpn_down_mbps",
+    var down: Int by store.int(
+        key = "zivpn_down",
         defaultValue = 2
     )
 
-    var receiveWindow: Int by store.int(
-        key = "zivpn_receive_window",
+    var recvwindow: Int by store.int(
+        key = "zivpn_recvwindow",
         defaultValue = 4194304
     )
 
-    var receiveWindowConn: Int by store.int(
-        key = "zivpn_receive_window_conn",
+    var recvwindowconn: Int by store.int(
+        key = "zivpn_recvwindowconn",
         defaultValue = 262144
     )
 
@@ -59,7 +59,7 @@ class ZivpnStore(context: Context) {
     )
 
     var fastOpen: Boolean by store.boolean(
-        key = "zivpn_fast_open",
+        key = "zivpn_fastOpen",
         defaultValue = true
     )
 }

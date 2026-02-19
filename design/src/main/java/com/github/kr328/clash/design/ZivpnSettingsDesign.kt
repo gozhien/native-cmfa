@@ -84,35 +84,35 @@ class ZivpnSettingsDesign(
             )
 
             editableText(
-                value = store::receiveWindow,
+                value = store::recvwindow,
                 adapter = intAdapter,
                 icon = R.drawable.ic_baseline_info,
-                title = R.string.zivpn_receive_window,
-                placeholder = R.string.zivpn_receive_window
+                title = R.string.zivpn_recvwindow,
+                placeholder = R.string.zivpn_recvwindow
             )
 
             editableText(
-                value = store::receiveWindowConn,
+                value = store::recvwindowconn,
                 adapter = intAdapter,
                 icon = R.drawable.ic_baseline_info,
-                title = R.string.zivpn_receive_window_conn,
-                placeholder = R.string.zivpn_receive_window_conn
+                title = R.string.zivpn_recvwindowconn,
+                placeholder = R.string.zivpn_recvwindowconn
             )
 
             editableText(
-                value = store::upMbps,
+                value = store::up,
                 adapter = intAdapter,
                 icon = R.drawable.ic_baseline_info,
-                title = R.string.zivpn_up_mbps,
-                placeholder = R.string.zivpn_up_mbps
+                title = R.string.zivpn_up,
+                placeholder = R.string.zivpn_up
             )
 
             editableText(
-                value = store::downMbps,
+                value = store::down,
                 adapter = intAdapter,
                 icon = R.drawable.ic_baseline_info,
-                title = R.string.zivpn_down_mbps,
-                placeholder = R.string.zivpn_down_mbps
+                title = R.string.zivpn_down,
+                placeholder = R.string.zivpn_down
             )
 
             editableText(
@@ -126,7 +126,7 @@ class ZivpnSettingsDesign(
             switch(
                 value = store::fastOpen,
                 icon = R.drawable.ic_baseline_apps,
-                title = R.string.zivpn_fast_open
+                title = R.string.zivpn_fastOpen
             )
         }
 

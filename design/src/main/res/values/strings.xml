@@ -356,10 +356,10 @@
     <string name="zivpn_ports">Port Ranges</string>
     <string name="zivpn_ports_summary">Comma separated ranges (e.g. 6000-7750,7751-9500)</string>
 
-    <string name="zivpn_receive_window">Receive Window</string>
-    <string name="zivpn_receive_window_conn">Receive Window Conn</string>
-    <string name="zivpn_up_mbps">Upload Mbps</string>
-    <string name="zivpn_down_mbps">Download Mbps</string>
+    <string name="zivpn_recvwindow">Receive Window</string>
+    <string name="zivpn_recvwindowconn">Receive Window Conn</string>
+    <string name="zivpn_up">Upload Mbps</string>
+    <string name="zivpn_down">Download Mbps</string>
     <string name="zivpn_config_yaml">Config YAML</string>
-    <string name="zivpn_fast_open">Fast Open</string>
+    <string name="zivpn_fastOpen">Fast Open</string>
 </resources>

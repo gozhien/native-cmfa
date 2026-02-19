@@ -130,13 +130,13 @@ class TunService : VpnService(), CoroutineScope by CoroutineScope(Dispatchers.De
                 val port = ports[i]
                 val range = if (i < ranges.size) ranges[i] else zivpnStore.portRanges // Fallback to full range
                 
-                val upMbps = zivpnStore.upMbps
-                val downMbps = zivpnStore.downMbps
-                val recvWindow = zivpnStore.receiveWindow
-                val recvWindowConn = zivpnStore.receiveWindowConn
+                val up = zivpnStore.up
+                val down = zivpnStore.down
+                val recvwindow = zivpnStore.recvwindow
+                val recvwindowconn = zivpnStore.recvwindowconn
                 val fastOpen = zivpnStore.fastOpen
 
-                val configContent = """{"server":"$serverHost:$range","obfs":"$obfs","auth":"$pass","socks5":{"listen":"127.0.0.1:$port"},"insecure":true,"up_mbps":$upMbps,"down_mbps":$downMbps,"receive_window":$recvWindow,"receive_window_conn":$recvWindowConn,"recv_window":$recvWindow,"recv_window_conn":$recvWindowConn,"fast_open":$fastOpen,"transport":{"up_mbps":$upMbps,"down_mbps":$downMbps,"receive_window":$recvWindow,"receive_window_conn":$recvWindowConn,"UpMbps":$upMbps,"DownMbps":$downMbps,"ReceiveWindow":$recvWindow,"ReceiveWindowConn":$recvWindowConn}}"""
+                val configContent = """{"server":"$serverHost:$range","obfs":"$obfs","auth":"$pass","socks5":{"listen":"127.0.0.1:$port"},"insecure":true,"up":$up,"down":$down,"recvwindow":$recvwindow,"recvwindowconn":$recvwindowconn,"fastOpen":$fastOpen,"transport":{"up":$up,"down":$down,"recvwindow":$recvwindow,"recvwindowconn":$recvwindowconn}}"""
                 
                 val pb = ProcessBuilder(libUz, "-s", obfs, "--config", configContent)
                 pb.environment()["LD_LIBRARY_PATH"] = nativeDir
