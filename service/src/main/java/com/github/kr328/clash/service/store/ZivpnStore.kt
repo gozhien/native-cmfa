@@ -1,6 +1,7 @@
 package com.github.kr328.clash.service.store
 
 import android.content.Context
+import androidx.core.content.edit
 import com.github.kr328.clash.common.log.Log
 import com.github.kr328.clash.common.store.Store
 import com.github.kr328.clash.common.store.asStoreProvider
@@ -11,11 +12,9 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 class ZivpnStore(context: Context) {
-    private val store = Store(
-        PreferenceProvider
-            .createSharedPreferencesFromContext(context)
-            .asStoreProvider()
-    )
+    private val sharedPreferences = PreferenceProvider.createSharedPreferencesFromContext(context)
+
+    private val store = Store(sharedPreferences.asStoreProvider())
 
     private val json = Json {
         ignoreUnknownKeys = true
@@ -69,29 +68,28 @@ class ZivpnStore(context: Context) {
         defaultValue = ""
     )
 
-    var profilesJson: String by store.string(
-        key = "zivpn_profiles",
-        defaultValue = "[]"
-    )
-
     var profiles: List<HysteriaProfile>
         get() = try {
-            Log.d("ZIVPN: Loading profiles, raw JSON: $profilesJson")
-            if (profilesJson.isEmpty() || profilesJson == "null") {
+            val jsonString = sharedPreferences.getString("zivpn_profiles", "[]") ?: "[]"
+            Log.d("ZIVPN: Loading profiles, raw JSON: $jsonString")
+            if (jsonString.isEmpty() || jsonString == "null" || jsonString == "[]") {
                 emptyList()
             } else {
-                val decoded = json.decodeFromString<List<HysteriaProfile>>(profilesJson)
+                val decoded = json.decodeFromString<List<HysteriaProfile>>(jsonString)
                 Log.d("ZIVPN: Loaded ${decoded.size} profiles from store")
                 decoded
             }
         } catch (e: Exception) {
-            Log.e("ZIVPN: Failed to decode profiles: $profilesJson", e)
+            val jsonString = sharedPreferences.getString("zivpn_profiles", "[]") ?: "[]"
+            Log.e("ZIVPN: Failed to decode profiles: $jsonString", e)
             emptyList()
         }
         set(value) {
             try {
                 val encoded = json.encodeToString(value)
-                profilesJson = encoded
+                sharedPreferences.edit(commit = true) {
+                    putString("zivpn_profiles", encoded)
+                }
                 Log.d("ZIVPN: Saved ${value.size} profiles to store, raw JSON: $encoded")
             } catch (e: Exception) {
                 Log.e("ZIVPN: Failed to encode profiles", e)

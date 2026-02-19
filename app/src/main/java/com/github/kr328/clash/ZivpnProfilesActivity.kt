@@ -140,6 +140,10 @@ class ZivpnProfilesActivity : BaseActivity<ZivpnProfilesDesign>() {
 
                 if (name.isNotBlank() && host.isNotBlank()) {
                     onSave(HysteriaProfile(name, host, pass))
+                } else {
+                    launch {
+                        design?.showToast(R.string.should_not_be_blank, com.github.kr328.clash.design.ui.ToastDuration.Short)
+                    }
                 }
             }
             .setNegativeButton(R.string.cancel, null)

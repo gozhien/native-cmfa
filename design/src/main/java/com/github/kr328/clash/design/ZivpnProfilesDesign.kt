@@ -64,5 +64,8 @@ class ZivpnProfilesDesign(
 
         binding.content.removeAllViews()
         binding.content.addView(screen.root)
+
+        binding.root.requestLayout()
+        binding.root.invalidate()
     }
 }
