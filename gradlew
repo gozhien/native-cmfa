@@ -117,6 +117,65 @@ esac
 CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar
 
 
+# Prefer Java 21 for Gradle/Kotlin compatibility when the environment default is newer.
+detect_java_major_version() {
+    java_bin=$1
+    [ -x "$java_bin" ] || return 1
+
+    version_line=$($java_bin -version 2>&1 | sed -n '1p') || return 1
+    version_value=$(printf '%s' "$version_line" | sed -n 's/.*version "\([^"]*\)".*/\1/p')
+
+    if [ -z "$version_value" ]; then
+        return 1
+    fi
+
+    major=$(printf '%s' "$version_value" | awk -F. '{ if ($1 == "1") print $2; else print $1 }')
+    [ -n "$major" ] || return 1
+
+    printf '%s' "$major"
+}
+
+find_java21_home() {
+    for candidate in \
+        "$HOME/.sdkman/candidates/java/21" \
+        "$HOME/.sdkman/candidates/java/21."* \
+        "$HOME/.local/share/mise/installs/java/21" \
+        "$HOME/.local/share/mise/installs/java/21."* \
+        "/root/.local/share/mise/installs/java/21" \
+        "/root/.local/share/mise/installs/java/21."*; do
+        [ -x "$candidate/bin/java" ] || continue
+        printf '%s' "$candidate"
+        return 0
+    done
+
+    return 1
+}
+
+if [ -n "$JAVA_HOME" ] && [ -x "$JAVA_HOME/bin/java" ]; then
+    current_major=$(detect_java_major_version "$JAVA_HOME/bin/java")
+    if [ -n "$current_major" ] && [ "$current_major" -gt 21 ] 2>/dev/null; then
+        java21_home=$(find_java21_home)
+        if [ -n "$java21_home" ]; then
+            JAVA_HOME=$java21_home
+            export JAVA_HOME
+            PATH="$JAVA_HOME/bin:$PATH"
+            export PATH
+        fi
+    fi
+elif [ -z "$JAVA_HOME" ] && command -v java >/dev/null 2>&1; then
+    current_major=$(detect_java_major_version "$(command -v java)")
+    if [ -n "$current_major" ] && [ "$current_major" -gt 21 ] 2>/dev/null; then
+        java21_home=$(find_java21_home)
+        if [ -n "$java21_home" ]; then
+            JAVA_HOME=$java21_home
+            export JAVA_HOME
+            PATH="$JAVA_HOME/bin:$PATH"
+            export PATH
+        fi
+    fi
+fi
+
+
 # Determine the Java command to use to start the JVM.
 if [ -n "$JAVA_HOME" ] ; then
     if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
