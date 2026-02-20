@@ -2,6 +2,9 @@ name: ZIVPN Native Build
 on:
   push:
     branches:
+      - "**"
+  pull_request:
+    branches:
       - main
   workflow_dispatch:
 
@@ -47,12 +50,6 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew :app:assembleAlphaRelease --stacktrace
-
-      - name: Upload ZIVPN Native APK (Arm64)
-        uses: actions/upload-artifact@v4
-        with:
-          name: ZIVPN-Native-Arm64-APK
-          path: app/build/outputs/apk/alpha/release/*-arm64-v8a-*.apk
 
       - name: Upload ZIVPN Native APK (Armv7)
         uses: actions/upload-artifact@v4
