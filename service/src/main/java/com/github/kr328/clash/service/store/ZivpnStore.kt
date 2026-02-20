@@ -6,10 +6,21 @@ import com.github.kr328.clash.common.store.asStoreProvider
 import com.github.kr328.clash.service.PreferenceProvider
 
 class ZivpnStore(context: Context) {
+    data class ServerProfile(
+        val name: String,
+        val host: String,
+        val password: String,
+    )
+
     private val store = Store(
         PreferenceProvider
             .createSharedPreferencesFromContext(context)
             .asStoreProvider()
+    )
+
+    var serverProfileName: String by store.string(
+        key = "zivpn_server_profile_name",
+        defaultValue = ""
     )
 
     var serverHost: String by store.string(
@@ -58,6 +69,11 @@ class ZivpnStore(context: Context) {
         defaultValue = ""
     )
 
+    var serverProfilesRaw: String by store.string(
+        key = "zivpn_server_profiles",
+        defaultValue = ""
+    )
+
     init {
         migrate("zivpn_hysteria_up", "zivpn_up")
         migrate("zivpn_hysteria_down", "zivpn_down")
@@ -73,5 +89,33 @@ class ZivpnStore(context: Context) {
                 store.provider.setString(newKey, oldValue)
             }
         }
+    }
+
+    fun getServerProfiles(): List<ServerProfile> {
+        return serverProfilesRaw
+            .lineSequence()
+            .map { it.trim() }
+            .filter { it.isNotBlank() }
+            .mapNotNull { raw ->
+                val parts = raw.split("|", limit = 3)
+
+                if (parts.size < 3) return@mapNotNull null
+
+                val name = parts[0].trim()
+                val host = parts[1].trim()
+                val password = parts[2]
+
+                if (name.isBlank() || host.isBlank() || password.isBlank()) {
+                    null
+                } else {
+                    ServerProfile(name, host, password)
+                }
+            }
+            .toList()
+    }
+
+    fun setServerProfiles(profiles: List<ServerProfile>) {
+        serverProfilesRaw = profiles
+            .joinToString("\n") { "${it.name}|${it.host}|${it.password}" }
     }
 }

@@ -351,8 +351,18 @@
 
     <string name="zivpn_settings">ZIVPN Native Settings</string>
     <string name="zivpn_host">Server Host</string>
+    <string name="zivpn_profile_name">Profile Name</string>
+    <string name="zivpn_save_profile">Save Current Profile</string>
+    <string name="zivpn_fill_profile_fields">Isi nama, server, dan password terlebih dahulu</string>
+    <string name="zivpn_ready_to_save">Siap simpan: %1$s</string>
     <string name="zivpn_pass">Server Password</string>
     <string name="zivpn_obfs">Obfs Key</string>
+    <string name="zivpn_server_profiles">Server Profiles</string>
+    <string name="zivpn_server_profiles_hint">Format: Name | Host | Password</string>
+    <string name="zivpn_apply_next_profile">Switch to Next Saved Profile</string>
+    <string name="zivpn_no_saved_profiles">No saved profile</string>
+    <string name="zivpn_saved_profiles_count">%1$d saved profiles</string>
+    <string name="zivpn_active_profile_summary">Active: %1$s (%2$s)</string>
     <string name="zivpn_ports">Port Ranges</string>
     <string name="zivpn_ports_summary">Comma separated ranges (e.g. 6000-7750,7751-9500)</string>
 
