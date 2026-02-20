@@ -12,9 +12,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 class ZivpnStore(context: Context) {
-    private val sharedPreferences = PreferenceProvider.createSharedPreferencesFromContext(context)
-
-    private val store = Store(sharedPreferences.asStoreProvider())
+    private val store = Store(PreferenceProvider.createSharedPreferencesFromContext(context).asStoreProvider())
 
     private val json = Json {
         ignoreUnknownKeys = true
@@ -68,11 +66,16 @@ class ZivpnStore(context: Context) {
         defaultValue = ""
     )
 
+    private var profilesJson: String by store.string(
+        key = "zivpn_profiles",
+        defaultValue = "[]"
+    )
+
     var profiles: List<HysteriaProfile>
         get() = try {
-            val jsonString = sharedPreferences.getString("zivpn_profiles", "[]") ?: "[]"
+            val jsonString = profilesJson
             Log.d("ZIVPN: Loading profiles, raw JSON: $jsonString")
-            if (jsonString.isEmpty() || jsonString == "null" || jsonString == "[]") {
+            if (jsonString.isBlank() || jsonString == "null" || jsonString == "[]") {
                 emptyList()
             } else {
                 val decoded = json.decodeFromString<List<HysteriaProfile>>(jsonString)
@@ -80,16 +83,13 @@ class ZivpnStore(context: Context) {
                 decoded
             }
         } catch (e: Exception) {
-            val jsonString = sharedPreferences.getString("zivpn_profiles", "[]") ?: "[]"
-            Log.e("ZIVPN: Failed to decode profiles: $jsonString", e)
+            Log.e("ZIVPN: Failed to decode profiles: $profilesJson", e)
             emptyList()
         }
         set(value) {
             try {
                 val encoded = json.encodeToString(value)
-                sharedPreferences.edit(commit = true) {
-                    putString("zivpn_profiles", encoded)
-                }
+                profilesJson = encoded
                 Log.d("ZIVPN: Saved ${value.size} profiles to store, raw JSON: $encoded")
             } catch (e: Exception) {
                 Log.e("ZIVPN: Failed to encode profiles", e)
