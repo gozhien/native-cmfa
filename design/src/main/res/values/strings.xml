@@ -369,4 +369,5 @@
     <string name="zivpn_edit_profile">Edit Profile</string>
     <string name="zivpn_delete_profile">Delete Profile</string>
     <string name="zivpn_use_profile">Use Profile</string>
+    <string name="zivpn_no_profiles">No profiles found. Add one above.</string>
 </resources>

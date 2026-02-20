@@ -29,8 +29,9 @@ class ZivpnProfilesActivity : BaseActivity<ZivpnProfilesDesign>() {
                                 showEditDialog(null) { newProfile ->
                                     try {
                                         Log.d("ZIVPN: Adding new profile: ${newProfile.name}")
-                                        store.profiles = store.profiles + newProfile
-                                        design.updateList()
+                                        val newProfiles = store.profiles + newProfile
+                                        store.profiles = newProfiles
+                                        design.updateList(newProfiles)
                                         launch {
                                             design.showToast(R.string.save, com.github.kr328.clash.design.ui.ToastDuration.Short)
                                         }
@@ -66,7 +67,7 @@ class ZivpnProfilesActivity : BaseActivity<ZivpnProfilesDesign>() {
                                                         val profiles = store.profiles.toMutableList()
                                                         profiles[request.index] = editedProfile
                                                         store.profiles = profiles
-                                                        design.updateList()
+                                                        design.updateList(profiles)
                                                         launch {
                                                             design.showToast(R.string.save, com.github.kr328.clash.design.ui.ToastDuration.Short)
                                                         }
@@ -82,7 +83,7 @@ class ZivpnProfilesActivity : BaseActivity<ZivpnProfilesDesign>() {
                                                     val profiles = store.profiles.toMutableList()
                                                     profiles.removeAt(request.index)
                                                     store.profiles = profiles
-                                                    design.updateList()
+                                                    design.updateList(profiles)
                                                 } catch (e: Exception) {
                                                     Log.e("ZIVPN: Failed to delete profile", e)
                                                 }

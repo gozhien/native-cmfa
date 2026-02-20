@@ -31,10 +31,10 @@ class ZivpnProfilesDesign(
         binding.activityBarLayout.applyFrom(context)
         binding.scrollRoot.bindAppBarElevation(binding.activityBarLayout)
 
-        updateList()
+        updateList(store.profiles)
     }
 
-    fun updateList() {
+    fun updateList(profiles: List<HysteriaProfile> = store.profiles) {
         val screen = preferenceScreen(context) {
             category(R.string.zivpn_profiles)
 
@@ -47,16 +47,20 @@ class ZivpnProfilesDesign(
                 }
             }
 
-            store.profiles.forEachIndexed { index, profile ->
-                clickable(
-                    title = R.string.empty,
-                    icon = R.drawable.ic_baseline_vpn_lock,
-                ) {
-                    title = profile.name
-                    summary = profile.host
+            if (profiles.isEmpty()) {
+                tips(R.string.zivpn_no_profiles)
+            } else {
+                profiles.forEachIndexed { index, profile ->
+                    clickable(
+                        title = R.string.empty,
+                        icon = R.drawable.ic_baseline_vpn_lock,
+                    ) {
+                        title = profile.name
+                        summary = profile.host
 
-                    clicked {
-                        requests.trySend(Request.Select(index, profile))
+                        clicked {
+                            requests.trySend(Request.Select(index, profile))
+                        }
                     }
                 }
             }
