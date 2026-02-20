@@ -73,6 +73,11 @@ class ZivpnSettingsDesign(
                 icon = R.drawable.ic_baseline_save,
             )
 
+            val editProfile = clickable(
+                title = R.string.zivpn_edit_profile,
+                icon = R.drawable.ic_baseline_edit,
+            )
+
             val applyNextProfile = clickable(
                 title = R.string.zivpn_apply_next_profile,
                 icon = R.drawable.ic_baseline_swap_vert,
@@ -93,6 +98,12 @@ class ZivpnSettingsDesign(
                         R.string.zivpn_ready_to_save,
                         store.serverProfileName,
                     )
+                }
+
+                editProfile.summary = if (store.serverProfileName.isBlank()) {
+                    context.getText(R.string.zivpn_fill_profile_fields)
+                } else {
+                    context.getString(R.string.zivpn_ready_to_edit, store.serverProfileName)
                 }
             }
 
@@ -126,6 +137,45 @@ class ZivpnSettingsDesign(
                             R.string.zivpn_active_profile_summary,
                             saved.name,
                             saved.host,
+                        )
+                        refreshProfileSummary()
+                    }
+                }
+            }
+
+            editProfile.clicked {
+                launch(Dispatchers.IO) {
+                    val name = store.serverProfileName.trim()
+                    val host = store.serverHost.trim()
+                    val pass = store.serverPass.trim()
+
+                    if (name.isBlank() || host.isBlank() || pass.isBlank()) {
+                        withContext(Dispatchers.Main) {
+                            refreshProfileSummary()
+                        }
+                        return@launch
+                    }
+
+                    val profiles = store.getServerProfiles().toMutableList()
+                    val index = profiles.indexOfFirst { it.name.equals(name, ignoreCase = true) }
+
+                    withContext(Dispatchers.Main) {
+                        if (index < 0) {
+                            editProfile.summary = context.getString(R.string.zivpn_profile_not_found, name)
+                        }
+                    }
+
+                    if (index < 0) return@launch
+
+                    val edited = ZivpnStore.ServerProfile(name, host, pass)
+                    profiles[index] = edited
+                    store.setServerProfiles(profiles)
+
+                    withContext(Dispatchers.Main) {
+                        editProfile.summary = context.getString(
+                            R.string.zivpn_active_profile_summary,
+                            edited.name,
+                            edited.host,
                         )
                         refreshProfileSummary()
                     }

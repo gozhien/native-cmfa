@@ -353,6 +353,9 @@
     <string name="zivpn_host">Server Host</string>
     <string name="zivpn_profile_name">Profile Name</string>
     <string name="zivpn_save_profile">Save Current Profile</string>
+    <string name="zivpn_edit_profile">Edit Saved Profile</string>
+    <string name="zivpn_ready_to_edit">Siap edit: %1$s</string>
+    <string name="zivpn_profile_not_found">Profil "%1$s" tidak ditemukan</string>
     <string name="zivpn_fill_profile_fields">Isi nama, server, dan password terlebih dahulu</string>
     <string name="zivpn_ready_to_save">Siap simpan: %1$s</string>
     <string name="zivpn_pass">Server Password</string>
