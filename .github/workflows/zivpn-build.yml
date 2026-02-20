@@ -17,6 +17,12 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+          cache: false
+
       - name: Manual Clone Mihomo Core
         run: |
           mkdir -p core/src/foss/golang/
@@ -37,11 +43,6 @@ jobs:
         with:
           distribution: "temurin"
           java-version: 21
-
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: "1.22"
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
