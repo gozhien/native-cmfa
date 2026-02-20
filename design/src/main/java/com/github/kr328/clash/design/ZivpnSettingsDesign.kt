@@ -149,7 +149,9 @@ class ZivpnSettingsDesign(
     private fun showProfilesPopup(onChanged: () -> Unit) {
         val popupBinding = DialogZivpnProfilesBinding.inflate(context.layoutInflater)
         val profiles = store.getServerProfiles().toMutableList()
-        var selectedIndex = -1
+        var selectedIndex = profiles.indexOfFirst {
+            it.name.equals(store.serverProfileName, ignoreCase = true) && it.host == store.serverHost
+        }
 
         val listAdapter = ArrayAdapter<String>(
             context,
@@ -234,6 +236,9 @@ class ZivpnSettingsDesign(
         }
 
         refreshList()
+        if (selectedIndex in profiles.indices) {
+            fillInput(profiles[selectedIndex])
+        }
 
         AlertDialog.Builder(context)
             .setTitle(R.string.zivpn_server_profiles)

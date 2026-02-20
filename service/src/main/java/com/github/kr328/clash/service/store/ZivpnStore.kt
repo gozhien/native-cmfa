@@ -4,6 +4,8 @@ import android.content.Context
 import com.github.kr328.clash.common.store.Store
 import com.github.kr328.clash.common.store.asStoreProvider
 import com.github.kr328.clash.service.PreferenceProvider
+import org.json.JSONArray
+import org.json.JSONObject
 
 class ZivpnStore(context: Context) {
     data class ServerProfile(
@@ -92,12 +94,45 @@ class ZivpnStore(context: Context) {
     }
 
     fun getServerProfiles(): List<ServerProfile> {
-        return serverProfilesRaw
+        val raw = serverProfilesRaw.trim()
+
+        if (raw.isBlank()) {
+            return emptyList()
+        }
+
+        if (raw.startsWith("[")) {
+            return try {
+                val jsonArray = JSONArray(raw)
+
+                (0 until jsonArray.length())
+                    .mapNotNull { index ->
+                        val item = jsonArray.optJSONObject(index) ?: return@mapNotNull null
+
+                        val name = item.optString("name").trim()
+                        val host = item.optString("host").trim()
+                        val password = item.optString("password")
+
+                        if (name.isBlank() || host.isBlank() || password.isBlank()) {
+                            null
+                        } else {
+                            ServerProfile(name, host, password)
+                        }
+                    }
+            } catch (_: Throwable) {
+                parseLegacyServerProfiles(raw)
+            }
+        }
+
+        return parseLegacyServerProfiles(raw)
+    }
+
+    private fun parseLegacyServerProfiles(raw: String): List<ServerProfile> {
+        return raw
             .lineSequence()
             .map { it.trim() }
             .filter { it.isNotBlank() }
-            .mapNotNull { raw ->
-                val parts = raw.split("|", limit = 3)
+            .mapNotNull { line ->
+                val parts = line.split("|", limit = 3)
 
                 if (parts.size < 3) return@mapNotNull null
 
@@ -115,7 +150,18 @@ class ZivpnStore(context: Context) {
     }
 
     fun setServerProfiles(profiles: List<ServerProfile>) {
-        serverProfilesRaw = profiles
-            .joinToString("\n") { "${it.name}|${it.host}|${it.password}" }
+        val jsonArray = JSONArray()
+
+        profiles.forEach { profile ->
+            jsonArray.put(
+                JSONObject().apply {
+                    put("name", profile.name)
+                    put("host", profile.host)
+                    put("password", profile.password)
+                }
+            )
+        }
+
+        serverProfilesRaw = jsonArray.toString()
     }
 }
