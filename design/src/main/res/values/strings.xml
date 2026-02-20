@@ -360,6 +360,9 @@
     <string name="zivpn_ready_to_save">Siap simpan: %1$s</string>
     <string name="zivpn_pass">Server Password</string>
     <string name="zivpn_obfs">Obfs Key</string>
+    <string name="zivpn_server_used">Server yang digunakan</string>
+    <string name="zivpn_no_server_used">Belum ada server aktif</string>
+    <string name="zivpn_switch_profile_popup">Pilih / Kelola Profile Server</string>
     <string name="zivpn_server_profiles">Server Profiles</string>
     <string name="zivpn_server_profiles_hint">Format: Name | Host | Password</string>
     <string name="zivpn_apply_next_profile">Switch to Next Saved Profile</string>

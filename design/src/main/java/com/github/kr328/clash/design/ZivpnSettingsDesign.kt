@@ -2,7 +2,10 @@ package com.github.kr328.clash.design
 
 import android.content.Context
 import android.view.View
+import android.widget.ArrayAdapter
+import androidx.appcompat.app.AlertDialog
 import com.github.kr328.clash.design.databinding.DesignSettingsCommonBinding
+import com.github.kr328.clash.design.databinding.DialogZivpnProfilesBinding
 import com.github.kr328.clash.design.preference.*
 import com.github.kr328.clash.design.util.applyFrom
 import com.github.kr328.clash.design.util.bindAppBarElevation
@@ -11,7 +14,6 @@ import com.github.kr328.clash.design.util.root
 import com.github.kr328.clash.service.store.ZivpnStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class ZivpnSettingsDesign(
     context: Context,
@@ -44,172 +46,41 @@ class ZivpnSettingsDesign(
         val screen = preferenceScreen(context) {
             category(R.string.zivpn_settings)
 
-            editableText(
-                value = store::serverProfileName,
-                adapter = stringAdapter,
-                icon = R.drawable.ic_outline_label,
-                title = R.string.zivpn_profile_name,
-                placeholder = R.string.zivpn_profile_name
-            )
-
-            editableText(
-                value = store::serverHost,
-                adapter = stringAdapter,
+            val serverUsed = clickable(
+                title = R.string.zivpn_server_used,
                 icon = R.drawable.ic_baseline_dns,
-                title = R.string.zivpn_host,
-                placeholder = R.string.zivpn_host
             )
 
-            editableText(
-                value = store::serverPass,
-                adapter = stringAdapter,
-                icon = R.drawable.ic_baseline_vpn_lock,
-                title = R.string.zivpn_pass,
-                placeholder = R.string.zivpn_pass
-            )
-
-            val saveProfile = clickable(
-                title = R.string.zivpn_save_profile,
-                icon = R.drawable.ic_baseline_save,
-            )
-
-            val editProfile = clickable(
-                title = R.string.zivpn_edit_profile,
-                icon = R.drawable.ic_baseline_edit,
-            )
-
-            val applyNextProfile = clickable(
-                title = R.string.zivpn_apply_next_profile,
+            val switchProfile = clickable(
+                title = R.string.zivpn_switch_profile_popup,
                 icon = R.drawable.ic_baseline_swap_vert,
             )
 
             fun refreshProfileSummary() {
-                val profiles = store.getServerProfiles()
-                applyNextProfile.summary = if (profiles.isEmpty()) {
+                val currentName = store.serverProfileName
+                val currentHost = store.serverHost
+                serverUsed.summary = if (currentHost.isBlank()) {
+                    context.getText(R.string.zivpn_no_server_used)
+                } else {
+                    if (currentName.isBlank()) currentHost else "$currentName ($currentHost)"
+                }
+
+                val savedCount = store.getServerProfiles().size
+                switchProfile.summary = if (savedCount == 0) {
                     context.getText(R.string.zivpn_no_saved_profiles)
                 } else {
-                    context.getString(R.string.zivpn_saved_profiles_count, profiles.size)
-                }
-
-                saveProfile.summary = if (store.serverProfileName.isBlank() || store.serverHost.isBlank() || store.serverPass.isBlank()) {
-                    context.getText(R.string.zivpn_fill_profile_fields)
-                } else {
-                    context.getString(
-                        R.string.zivpn_ready_to_save,
-                        store.serverProfileName,
-                    )
-                }
-
-                editProfile.summary = if (store.serverProfileName.isBlank()) {
-                    context.getText(R.string.zivpn_fill_profile_fields)
-                } else {
-                    context.getString(R.string.zivpn_ready_to_edit, store.serverProfileName)
+                    context.getString(R.string.zivpn_saved_profiles_count, savedCount)
                 }
             }
 
-            saveProfile.clicked {
-                launch(Dispatchers.IO) {
-                    val name = store.serverProfileName.trim()
-                    val host = store.serverHost.trim()
-                    val pass = store.serverPass.trim()
-
-                    if (name.isBlank() || host.isBlank() || pass.isBlank()) {
-                        withContext(Dispatchers.Main) {
-                            refreshProfileSummary()
-                        }
-                        return@launch
-                    }
-
-                    val profiles = store.getServerProfiles().toMutableList()
-                    val index = profiles.indexOfFirst { it.name.equals(name, ignoreCase = true) }
-                    val saved = ZivpnStore.ServerProfile(name, host, pass)
-
-                    if (index >= 0) {
-                        profiles[index] = saved
-                    } else {
-                        profiles.add(saved)
-                    }
-
-                    store.setServerProfiles(profiles)
-
-                    withContext(Dispatchers.Main) {
-                        saveProfile.summary = context.getString(
-                            R.string.zivpn_active_profile_summary,
-                            saved.name,
-                            saved.host,
-                        )
-                        refreshProfileSummary()
-                    }
+            val openProfilePopup = {
+                showProfilesPopup {
+                    refreshProfileSummary()
                 }
             }
 
-            editProfile.clicked {
-                launch(Dispatchers.IO) {
-                    val name = store.serverProfileName.trim()
-                    val host = store.serverHost.trim()
-                    val pass = store.serverPass.trim()
-
-                    if (name.isBlank() || host.isBlank() || pass.isBlank()) {
-                        withContext(Dispatchers.Main) {
-                            refreshProfileSummary()
-                        }
-                        return@launch
-                    }
-
-                    val profiles = store.getServerProfiles().toMutableList()
-                    val index = profiles.indexOfFirst { it.name.equals(name, ignoreCase = true) }
-
-                    withContext(Dispatchers.Main) {
-                        if (index < 0) {
-                            editProfile.summary = context.getString(R.string.zivpn_profile_not_found, name)
-                        }
-                    }
-
-                    if (index < 0) return@launch
-
-                    val edited = ZivpnStore.ServerProfile(name, host, pass)
-                    profiles[index] = edited
-                    store.setServerProfiles(profiles)
-
-                    withContext(Dispatchers.Main) {
-                        editProfile.summary = context.getString(
-                            R.string.zivpn_active_profile_summary,
-                            edited.name,
-                            edited.host,
-                        )
-                        refreshProfileSummary()
-                    }
-                }
-            }
-
-            applyNextProfile.clicked {
-                launch(Dispatchers.IO) {
-                    val profiles = store.getServerProfiles()
-
-                    if (profiles.isEmpty()) return@launch
-
-                    val currentHost = store.serverHost
-                    val currentPassword = store.serverPass
-                    val currentIndex = profiles.indexOfFirst {
-                        it.host == currentHost && it.password == currentPassword
-                    }
-                    val nextIndex = if (currentIndex < 0) 0 else (currentIndex + 1) % profiles.size
-                    val selected = profiles[nextIndex]
-
-                    store.serverProfileName = selected.name
-                    store.serverHost = selected.host
-                    store.serverPass = selected.password
-
-                    withContext(Dispatchers.Main) {
-                        applyNextProfile.summary = context.getString(
-                            R.string.zivpn_active_profile_summary,
-                            selected.name,
-                            selected.host,
-                        )
-                        refreshProfileSummary()
-                    }
-                }
-            }
+            serverUsed.clicked(openProfilePopup)
+            switchProfile.clicked(openProfilePopup)
 
             launch(Dispatchers.Main) {
                 refreshProfileSummary()
@@ -273,5 +144,110 @@ class ZivpnSettingsDesign(
         }
 
         binding.content.addView(screen.root)
+    }
+
+    private fun showProfilesPopup(onChanged: () -> Unit) {
+        val popupBinding = DialogZivpnProfilesBinding.inflate(context.layoutInflater)
+        val profiles = store.getServerProfiles().toMutableList()
+        var selectedIndex = -1
+
+        val listAdapter = ArrayAdapter<String>(
+            context,
+            android.R.layout.simple_list_item_single_choice,
+            mutableListOf(),
+        )
+
+        fun refreshList() {
+            listAdapter.clear()
+            listAdapter.addAll(profiles.map { "${it.name} (${it.host})" })
+            listAdapter.notifyDataSetChanged()
+
+            if (selectedIndex in profiles.indices) {
+                popupBinding.profileListView.setItemChecked(selectedIndex, true)
+            } else {
+                popupBinding.profileListView.clearChoices()
+                selectedIndex = -1
+            }
+        }
+
+        fun fillInput(profile: ZivpnStore.ServerProfile) {
+            popupBinding.profileNameView.setText(profile.name)
+            popupBinding.profileHostView.setText(profile.host)
+            popupBinding.profilePasswordView.setText(profile.password)
+        }
+
+        popupBinding.profileListView.adapter = listAdapter
+        popupBinding.profileListView.setOnItemClickListener { _, _, position, _ ->
+            selectedIndex = position
+            fillInput(profiles[position])
+        }
+
+        popupBinding.saveProfileView.setOnClickListener {
+            val name = popupBinding.profileNameView.text?.toString()?.trim().orEmpty()
+            val host = popupBinding.profileHostView.text?.toString()?.trim().orEmpty()
+            val password = popupBinding.profilePasswordView.text?.toString()?.trim().orEmpty()
+
+            if (name.isBlank() || host.isBlank() || password.isBlank()) return@setOnClickListener
+
+            val profile = ZivpnStore.ServerProfile(name, host, password)
+            val index = profiles.indexOfFirst { it.name.equals(name, ignoreCase = true) }
+
+            if (index >= 0) {
+                profiles[index] = profile
+                selectedIndex = index
+            } else {
+                profiles.add(profile)
+                selectedIndex = profiles.lastIndex
+            }
+
+            store.setServerProfiles(profiles)
+            refreshList()
+            onChanged()
+        }
+
+        popupBinding.editProfileView.setOnClickListener {
+            if (selectedIndex !in profiles.indices) return@setOnClickListener
+
+            val name = popupBinding.profileNameView.text?.toString()?.trim().orEmpty()
+            val host = popupBinding.profileHostView.text?.toString()?.trim().orEmpty()
+            val password = popupBinding.profilePasswordView.text?.toString()?.trim().orEmpty()
+
+            if (name.isBlank() || host.isBlank() || password.isBlank()) return@setOnClickListener
+
+            profiles[selectedIndex] = ZivpnStore.ServerProfile(name, host, password)
+            store.setServerProfiles(profiles)
+            refreshList()
+            onChanged()
+        }
+
+        popupBinding.deleteProfileView.setOnClickListener {
+            if (selectedIndex !in profiles.indices) return@setOnClickListener
+
+            profiles.removeAt(selectedIndex)
+            store.setServerProfiles(profiles)
+            selectedIndex = -1
+            popupBinding.profileNameView.setText("")
+            popupBinding.profileHostView.setText("")
+            popupBinding.profilePasswordView.setText("")
+            refreshList()
+            onChanged()
+        }
+
+        refreshList()
+
+        AlertDialog.Builder(context)
+            .setTitle(R.string.zivpn_server_profiles)
+            .setView(popupBinding.root)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                if (selectedIndex !in profiles.indices) return@setPositiveButton
+
+                val selected = profiles[selectedIndex]
+                store.serverProfileName = selected.name
+                store.serverHost = selected.host
+                store.serverPass = selected.password
+                onChanged()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 }
