@@ -14,6 +14,7 @@ import kotlinx.serialization.json.Json
 class ZivpnStore(context: Context) {
     private val sharedPreferences = PreferenceProvider.createSharedPreferencesFromContext(context)
     private val store = Store(sharedPreferences.asStoreProvider())
+    private val profilesFile = context.filesDir.resolve("zivpn_profiles.json")
 
     private val json = Json {
         ignoreUnknownKeys = true
@@ -69,26 +70,24 @@ class ZivpnStore(context: Context) {
 
     var profiles: List<HysteriaProfile>
         get() = try {
-            val jsonString = sharedPreferences.getString("zivpn_profiles", "[]") ?: "[]"
-            Log.d("ZIVPN: Loading profiles, raw JSON: $jsonString")
+            val jsonString = if (profilesFile.exists()) profilesFile.readText() else "[]"
+            Log.d("ZIVPN: Loading profiles from file, raw JSON: $jsonString")
             if (jsonString.isBlank() || jsonString == "null" || jsonString == "[]") {
                 emptyList()
             } else {
                 json.decodeFromString<List<HysteriaProfile>>(jsonString)
             }
         } catch (e: Exception) {
-            Log.e("ZIVPN: Failed to decode profiles", e)
+            Log.e("ZIVPN: Failed to decode profiles from file", e)
             emptyList()
         }
         set(value) {
             try {
                 val encoded = json.encodeToString(value)
-                sharedPreferences.edit(commit = true) {
-                    putString("zivpn_profiles", encoded)
-                }
-                Log.d("ZIVPN: Saved ${value.size} profiles to store")
+                profilesFile.writeText(encoded)
+                Log.d("ZIVPN: Saved ${value.size} profiles to file")
             } catch (e: Exception) {
-                Log.e("ZIVPN: Failed to encode profiles", e)
+                Log.e("ZIVPN: Failed to encode profiles to file", e)
             }
         }
 
