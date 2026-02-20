@@ -58,6 +58,11 @@ class ZivpnStore(context: Context) {
         defaultValue = ""
     )
 
+    var profiles: String by store.string(
+        key = "zivpn_profiles",
+        defaultValue = "[]"
+    )
+
     init {
         migrate("zivpn_hysteria_up", "zivpn_up")
         migrate("zivpn_hysteria_down", "zivpn_down")

@@ -361,4 +361,12 @@
     <string name="zivpn_up">Upload Speed (e.g. 50 Mbps)</string>
     <string name="zivpn_down">Download Speed (e.g. 50 Mbps)</string>
     <string name="zivpn_clash_yaml">Clash YAML Config</string>
+
+    <string name="zivpn_profiles">Server Profiles</string>
+    <string name="zivpn_save_profile">Save Current as Profile</string>
+    <string name="zivpn_profile_name">Profile Name</string>
+    <string name="zivpn_delete_profile">Delete Profile</string>
+    <string name="zivpn_profile_saved">Profile saved</string>
+    <string name="zivpn_profile_deleted">Profile deleted</string>
+    <string name="zivpn_select_profile">Select profile</string>
 </resources>
