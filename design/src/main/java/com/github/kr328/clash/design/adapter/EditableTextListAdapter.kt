@@ -15,6 +15,8 @@ class EditableTextListAdapter<T>(
     class Holder(val binding: AdapterEditableTextListBinding) :
         RecyclerView.ViewHolder(binding.root)
 
+    var onEdit: ((Int, T) -> Unit)? = null
+
     fun addElement(text: String) {
         val value = adapter.to(text)
 
@@ -33,10 +35,17 @@ class EditableTextListAdapter<T>(
         val current = values[position]
 
         holder.binding.textView.text = adapter.from(current)
-        holder.binding.deleteView.setOnClickListener {
-            val index = values.indexOf(current)
+        holder.binding.editView.setOnClickListener {
+            val index = holder.bindingAdapterPosition
 
-            if (index >= 0) {
+            if (index != RecyclerView.NO_POSITION) {
+                onEdit?.invoke(index, values[index])
+            }
+        }
+        holder.binding.deleteView.setOnClickListener {
+            val index = holder.bindingAdapterPosition
+
+            if (index != RecyclerView.NO_POSITION) {
                 values.removeAt(index)
                 notifyItemRemoved(index)
             }

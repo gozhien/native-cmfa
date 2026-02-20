@@ -3,6 +3,7 @@ package com.github.kr328.clash.design
 import android.content.Context
 import android.view.View
 import com.github.kr328.clash.design.databinding.DesignSettingsCommonBinding
+import com.github.kr328.clash.design.dialog.requestServerProfileInput
 import com.github.kr328.clash.design.preference.*
 import com.github.kr328.clash.design.util.applyFrom
 import com.github.kr328.clash.design.util.bindAppBarElevation
@@ -93,7 +94,11 @@ class ZivpnSettingsDesign(
                 icon = R.drawable.ic_baseline_view_list,
                 title = R.string.zivpn_server_profiles,
                 placeholder = R.string.zivpn_server_profiles_hint,
-            )
+            ) {
+                requester = { initial ->
+                    context.requestServerProfileInput(initial)
+                }
+            }
 
             val applyNextProfile = clickable(
                 title = R.string.zivpn_apply_next_profile,

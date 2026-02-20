@@ -13,6 +13,8 @@ interface EditableTextListPreference<T> : ClickablePreference {
     var placeholder: CharSequence?
 
     var list: List<T>?
+
+    var requester: (suspend (initial: T?) -> T?)?
 }
 
 fun <T> PreferenceScreen.editableTextList(
@@ -42,6 +44,7 @@ fun <T> PreferenceScreen.editableTextList(
                     }
                 }
             override var placeholder: CharSequence? = null
+            override var requester: (suspend (initial: T?) -> T?)? = null
         }
 
     if (placeholder != null) {
@@ -63,7 +66,8 @@ fun <T> PreferenceScreen.editableTextList(
                     impl.list,
                     context,
                     adapter,
-                    impl.title
+                    impl.title,
+                    impl.requester
                 )
 
                 withContext(Dispatchers.IO) {
@@ -83,26 +87,55 @@ private suspend fun <T> requestEditTextList(
     context: Context,
     adapter: TextAdapter<T>,
     title: CharSequence,
-): List<T>? {
+    requester: (suspend (initial: T?) -> T?)?,
+): List<T>? = coroutineScope {
     val recyclerAdapter = EditableTextListAdapter(
         context,
         initialValue?.toMutableList() ?: mutableListOf(),
         adapter
     )
 
-    val result = requestEditableListOverlay(context, recyclerAdapter, title) {
-        val text = context.requestModelTextInput(
-            initial = "",
-            title = title,
-            hint = title
-        )
+    recyclerAdapter.onEdit = { index, value ->
+        launch {
+            val edited = if (requester != null) {
+                requester.invoke(value)
+            } else {
+                val text = context.requestModelTextInput(
+                    initial = adapter.from(value),
+                    title = title,
+                    hint = title
+                )
 
-        if (text.isNotBlank()) {
-            recyclerAdapter.addElement(text)
+                if (text.isNotBlank()) adapter.to(text) else null
+            }
+
+            if (edited != null) {
+                recyclerAdapter.values[index] = edited
+                recyclerAdapter.notifyItemChanged(index)
+            }
         }
     }
 
-    return when (result) {
+    val result = requestEditableListOverlay(context, recyclerAdapter, title) {
+        val newItem = if (requester != null) {
+            requester.invoke(null)
+        } else {
+            val text = context.requestModelTextInput(
+                initial = "",
+                title = title,
+                hint = title
+            )
+
+            if (text.isNotBlank()) adapter.to(text) else null
+        }
+
+        if (newItem != null) {
+            recyclerAdapter.values.add(newItem)
+            recyclerAdapter.notifyItemInserted(recyclerAdapter.values.size - 1)
+        }
+    }
+
+    when (result) {
         EditableListOverlayResult.Cancel -> initialValue
         EditableListOverlayResult.Apply -> recyclerAdapter.values
         EditableListOverlayResult.Reset -> null
