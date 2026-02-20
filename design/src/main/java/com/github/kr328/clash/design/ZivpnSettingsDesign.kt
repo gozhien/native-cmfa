@@ -25,7 +25,7 @@ class ZivpnSettingsDesign(
     override val root: View
         get() = binding.root
 
-    private val stringAdapter = object : NullableTextAdapter<String> {
+    private val nullableStringAdapter = object : NullableTextAdapter<String> {
         override fun from(value: String): String {
             return value
         }
@@ -49,7 +49,7 @@ class ZivpnSettingsDesign(
 
             editableTextList(
                 value = store::quickProfileEntries,
-                adapter = stringAdapter,
+                adapter = TextAdapter.String,
                 icon = R.drawable.ic_baseline_view_list,
                 title = R.string.zivpn_quick_profiles,
                 placeholder = R.string.zivpn_quick_profiles_placeholder
@@ -77,23 +77,23 @@ class ZivpnSettingsDesign(
 
             editableText(
                 value = store::serverHost,
-                adapter = stringAdapter,
+                adapter = nullableStringAdapter,
                 icon = R.drawable.ic_baseline_dns,
                 title = R.string.zivpn_host,
                 placeholder = R.string.zivpn_host
             )
-            
-             editableText(
+
+            editableText(
                 value = store::serverPass,
-                adapter = stringAdapter,
+                adapter = nullableStringAdapter,
                 icon = R.drawable.ic_baseline_vpn_lock,
                 title = R.string.zivpn_pass,
                 placeholder = R.string.zivpn_pass
             )
 
-             editableText(
+            editableText(
                 value = store::serverObfs,
-                adapter = stringAdapter,
+                adapter = nullableStringAdapter,
                 icon = R.drawable.ic_baseline_info,
                 title = R.string.zivpn_obfs,
                 placeholder = R.string.zivpn_obfs
@@ -101,7 +101,7 @@ class ZivpnSettingsDesign(
 
             editableText(
                 value = store::portRanges,
-                adapter = stringAdapter,
+                adapter = nullableStringAdapter,
                 icon = R.drawable.ic_baseline_apps,
                 title = R.string.zivpn_ports,
                 placeholder = R.string.zivpn_ports_summary
@@ -109,7 +109,7 @@ class ZivpnSettingsDesign(
 
             editableText(
                 value = store::recvwindow,
-                adapter = stringAdapter,
+                adapter = nullableStringAdapter,
                 icon = R.drawable.ic_baseline_info,
                 title = R.string.zivpn_recv_window,
                 placeholder = R.string.zivpn_recv_window
@@ -117,7 +117,7 @@ class ZivpnSettingsDesign(
 
             editableText(
                 value = store::recvwindowconn,
-                adapter = stringAdapter,
+                adapter = nullableStringAdapter,
                 icon = R.drawable.ic_baseline_info,
                 title = R.string.zivpn_recv_window_conn,
                 placeholder = R.string.zivpn_recv_window_conn
@@ -125,7 +125,7 @@ class ZivpnSettingsDesign(
 
             editableText(
                 value = store::up,
-                adapter = stringAdapter,
+                adapter = nullableStringAdapter,
                 icon = R.drawable.ic_baseline_info,
                 title = R.string.zivpn_up,
                 placeholder = R.string.zivpn_up
@@ -133,7 +133,7 @@ class ZivpnSettingsDesign(
 
             editableText(
                 value = store::down,
-                adapter = stringAdapter,
+                adapter = nullableStringAdapter,
                 icon = R.drawable.ic_baseline_info,
                 title = R.string.zivpn_down,
                 placeholder = R.string.zivpn_down
@@ -141,7 +141,7 @@ class ZivpnSettingsDesign(
 
             editableText(
                 value = store::clashYaml,
-                adapter = stringAdapter,
+                adapter = nullableStringAdapter,
                 icon = R.drawable.ic_baseline_info,
                 title = R.string.zivpn_clash_yaml,
                 placeholder = R.string.zivpn_clash_yaml
