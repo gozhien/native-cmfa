@@ -12,7 +12,8 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 class ZivpnStore(context: Context) {
-    private val store = Store(PreferenceProvider.createSharedPreferencesFromContext(context).asStoreProvider())
+    private val sharedPreferences = PreferenceProvider.createSharedPreferencesFromContext(context)
+    private val store = Store(sharedPreferences.asStoreProvider())
 
     private val json = Json {
         ignoreUnknownKeys = true
@@ -66,14 +67,10 @@ class ZivpnStore(context: Context) {
         defaultValue = ""
     )
 
-    private var profilesJson: String by store.string(
-        key = "zivpn_profiles",
-        defaultValue = "[]"
-    )
-
     var profiles: List<HysteriaProfile>
         get() = try {
-            val jsonString = profilesJson
+            val jsonString = sharedPreferences.getString("zivpn_profiles", "[]") ?: "[]"
+            Log.d("ZIVPN: Loading profiles, raw JSON: $jsonString")
             if (jsonString.isBlank() || jsonString == "null" || jsonString == "[]") {
                 emptyList()
             } else {
@@ -85,7 +82,11 @@ class ZivpnStore(context: Context) {
         }
         set(value) {
             try {
-                profilesJson = json.encodeToString(value)
+                val encoded = json.encodeToString(value)
+                sharedPreferences.edit(commit = true) {
+                    putString("zivpn_profiles", encoded)
+                }
+                Log.d("ZIVPN: Saved ${value.size} profiles to store")
             } catch (e: Exception) {
                 Log.e("ZIVPN: Failed to encode profiles", e)
             }
