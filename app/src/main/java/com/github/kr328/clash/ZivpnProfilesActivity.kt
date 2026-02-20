@@ -16,24 +16,26 @@ import com.github.kr328.clash.design.R
 class ZivpnProfilesActivity : BaseActivity<ZivpnProfilesDesign>() {
     override suspend fun main() {
         val store = ZivpnStore(this)
-        val design = ZivpnProfilesDesign(this, store)
+        val currentProfiles = store.profiles.toMutableList()
+        val d = ZivpnProfilesDesign(this, store)
 
-        setContentDesign(design)
+        setContentDesign(d)
+        d.updateList(currentProfiles)
 
         while (isActive) {
             select<Unit> {
-                design.requests.onReceive { request ->
+                d.requests.onReceive { request ->
                     try {
                         when (request) {
                             is ZivpnProfilesDesign.Request.Add -> {
                                 showEditDialog(null) { newProfile ->
                                     try {
                                         Log.d("ZIVPN: Adding new profile: ${newProfile.name}")
-                                        val newProfiles = store.profiles + newProfile
-                                        store.profiles = newProfiles
-                                        design.updateList(newProfiles)
+                                        currentProfiles.add(newProfile)
+                                        store.profiles = currentProfiles
+                                        d.updateList(currentProfiles)
                                         launch {
-                                            design.showToast(R.string.save, com.github.kr328.clash.design.ui.ToastDuration.Short)
+                                            d.showToast(R.string.save, com.github.kr328.clash.design.ui.ToastDuration.Short)
                                         }
                                     } catch (e: Exception) {
                                         Log.e("ZIVPN: Failed to add profile", e)
@@ -50,7 +52,7 @@ class ZivpnProfilesActivity : BaseActivity<ZivpnProfilesDesign>() {
                                                 store.serverPass = request.profile.pass
 
                                                 launch {
-                                                    design.showToast(
+                                                    d.showToast(
                                                         getString(
                                                             R.string.format_profile_activated,
                                                             request.profile.name
@@ -64,12 +66,11 @@ class ZivpnProfilesActivity : BaseActivity<ZivpnProfilesDesign>() {
                                                 showEditDialog(request.profile) { editedProfile ->
                                                     try {
                                                         Log.d("ZIVPN: Editing profile at index ${request.index}: ${editedProfile.name}")
-                                                        val profiles = store.profiles.toMutableList()
-                                                        profiles[request.index] = editedProfile
-                                                        store.profiles = profiles
-                                                        design.updateList(profiles)
+                                                        currentProfiles[request.index] = editedProfile
+                                                        store.profiles = currentProfiles
+                                                        d.updateList(currentProfiles)
                                                         launch {
-                                                            design.showToast(R.string.save, com.github.kr328.clash.design.ui.ToastDuration.Short)
+                                                            d.showToast(R.string.save, com.github.kr328.clash.design.ui.ToastDuration.Short)
                                                         }
                                                     } catch (e: Exception) {
                                                         Log.e("ZIVPN: Failed to edit profile", e)
@@ -80,10 +81,9 @@ class ZivpnProfilesActivity : BaseActivity<ZivpnProfilesDesign>() {
                                             "delete" -> {
                                                 try {
                                                     Log.d("ZIVPN: Deleting profile at index ${request.index}")
-                                                    val profiles = store.profiles.toMutableList()
-                                                    profiles.removeAt(request.index)
-                                                    store.profiles = profiles
-                                                    design.updateList(profiles)
+                                                    currentProfiles.removeAt(request.index)
+                                                    store.profiles = currentProfiles
+                                                    d.updateList(currentProfiles)
                                                 } catch (e: Exception) {
                                                     Log.e("ZIVPN: Failed to delete profile", e)
                                                 }
