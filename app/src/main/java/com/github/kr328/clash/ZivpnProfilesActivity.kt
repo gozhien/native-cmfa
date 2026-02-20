@@ -30,7 +30,6 @@ class ZivpnProfilesActivity : BaseActivity<ZivpnProfilesDesign>() {
                             is ZivpnProfilesDesign.Request.Add -> {
                                 showEditDialog(null) { newProfile ->
                                     try {
-                                        Log.d("ZIVPN: Adding new profile: ${newProfile.name}")
                                         currentProfiles.add(newProfile)
                                         store.profiles = currentProfiles
                                         d.updateList(currentProfiles)
@@ -47,7 +46,6 @@ class ZivpnProfilesActivity : BaseActivity<ZivpnProfilesDesign>() {
                                     try {
                                         when (action) {
                                             "use" -> {
-                                                Log.d("ZIVPN: Using profile ${request.profile.name}: host=${request.profile.host}, pass=***")
                                                 store.serverHost = request.profile.host
                                                 store.serverPass = request.profile.pass
 
@@ -65,7 +63,6 @@ class ZivpnProfilesActivity : BaseActivity<ZivpnProfilesDesign>() {
                                             "edit" -> {
                                                 showEditDialog(request.profile) { editedProfile ->
                                                     try {
-                                                        Log.d("ZIVPN: Editing profile at index ${request.index}: ${editedProfile.name}")
                                                         currentProfiles[request.index] = editedProfile
                                                         store.profiles = currentProfiles
                                                         d.updateList(currentProfiles)
@@ -80,7 +77,6 @@ class ZivpnProfilesActivity : BaseActivity<ZivpnProfilesDesign>() {
 
                                             "delete" -> {
                                                 try {
-                                                    Log.d("ZIVPN: Deleting profile at index ${request.index}")
                                                     currentProfiles.removeAt(request.index)
                                                     store.profiles = currentProfiles
                                                     d.updateList(currentProfiles)
@@ -136,8 +132,6 @@ class ZivpnProfilesActivity : BaseActivity<ZivpnProfilesDesign>() {
                 } else {
                     hostRaw
                 }
-
-                Log.d("ZIVPN: Profile dialog OK: name=$name, hostRaw=$hostRaw, hostStripped=$host")
 
                 if (name.isNotBlank() && host.isNotBlank()) {
                     onSave(HysteriaProfile(name, host, pass))
