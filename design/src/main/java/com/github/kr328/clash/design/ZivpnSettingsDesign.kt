@@ -13,7 +13,11 @@ import com.github.kr328.clash.service.store.ZivpnStore
 class ZivpnSettingsDesign(
     context: Context,
     store: ZivpnStore,
-) : Design<Unit>(context) {
+) : Design<ZivpnSettingsDesign.Request>(context) {
+    sealed class Request {
+        object ApplyNextQuickProfile : Request()
+        object SaveCurrentAsQuickProfile : Request()
+    }
 
     private val binding = DesignSettingsCommonBinding
         .inflate(context.layoutInflater, context.root, false)
@@ -40,6 +44,36 @@ class ZivpnSettingsDesign(
 
         val screen = preferenceScreen(context) {
             category(R.string.zivpn_settings)
+
+            category(R.string.zivpn_quick_profiles)
+
+            editableTextList(
+                value = store::quickProfileEntries,
+                adapter = stringAdapter,
+                icon = R.drawable.ic_baseline_view_list,
+                title = R.string.zivpn_quick_profiles,
+                placeholder = R.string.zivpn_quick_profiles_placeholder
+            )
+
+            clickable(
+                icon = R.drawable.ic_baseline_save,
+                title = R.string.zivpn_save_current_profile,
+                summary = R.string.zivpn_save_current_profile_summary
+            ) {
+                clicked {
+                    requests.trySend(Request.SaveCurrentAsQuickProfile)
+                }
+            }
+
+            clickable(
+                icon = R.drawable.ic_baseline_swap_vert,
+                title = R.string.zivpn_apply_next_profile,
+                summary = R.string.zivpn_apply_next_profile_summary
+            ) {
+                clicked {
+                    requests.trySend(Request.ApplyNextQuickProfile)
+                }
+            }
 
             editableText(
                 value = store::serverHost,

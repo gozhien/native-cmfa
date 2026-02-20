@@ -6,6 +6,12 @@ import com.github.kr328.clash.common.store.asStoreProvider
 import com.github.kr328.clash.service.PreferenceProvider
 
 class ZivpnStore(context: Context) {
+    data class QuickProfile(
+        val name: String,
+        val host: String,
+        val password: String
+    )
+
     private val store = Store(
         PreferenceProvider
             .createSharedPreferencesFromContext(context)
@@ -58,6 +64,25 @@ class ZivpnStore(context: Context) {
         defaultValue = ""
     )
 
+    private var quickProfilesRaw: String by store.string(
+        key = "zivpn_quick_profiles",
+        defaultValue = ""
+    )
+
+    var quickProfileEntries: List<String>?
+        get() = getQuickProfiles().map { "${it.name}|${it.host}|${it.password}" }
+        set(value) {
+            quickProfilesRaw = value
+                ?.mapNotNull { line -> parseProfileLine(line) }
+                ?.joinToString("\n") { serializeProfile(it) }
+                ?: ""
+        }
+
+    var selectedQuickProfile: Int by store.int(
+        key = "zivpn_selected_quick_profile",
+        defaultValue = 0
+    )
+
     init {
         migrate("zivpn_hysteria_up", "zivpn_up")
         migrate("zivpn_hysteria_down", "zivpn_down")
@@ -73,5 +98,61 @@ class ZivpnStore(context: Context) {
                 store.provider.setString(newKey, oldValue)
             }
         }
+    }
+
+    fun getQuickProfiles(): List<QuickProfile> {
+        return quickProfilesRaw
+            .lineSequence()
+            .mapNotNull { parseProfileLine(it) }
+            .toList()
+    }
+
+    fun applyNextQuickProfile(): QuickProfile? {
+        val profiles = getQuickProfiles()
+        if (profiles.isEmpty()) return null
+
+        val nextIndex = selectedQuickProfile.coerceAtLeast(0) % profiles.size
+        val profile = profiles[nextIndex]
+
+        serverHost = profile.host
+        serverPass = profile.password
+        selectedQuickProfile = (nextIndex + 1) % profiles.size
+
+        return profile
+    }
+
+    fun saveCurrentToQuickProfiles(name: String): QuickProfile {
+        val trimmedName = name.trim().ifBlank { "Server ${System.currentTimeMillis() / 1000}" }
+        val newProfile = QuickProfile(
+            name = trimmedName,
+            host = serverHost,
+            password = serverPass
+        )
+
+        val updated = getQuickProfiles()
+            .filterNot { it.name.equals(trimmedName, ignoreCase = true) }
+            .plus(newProfile)
+
+        quickProfilesRaw = updated.joinToString("\n") { serializeProfile(it) }
+
+        return newProfile
+    }
+
+    private fun serializeProfile(profile: QuickProfile): String {
+        return "${profile.name}|${profile.host}|${profile.password}"
+    }
+
+    private fun parseProfileLine(line: String): QuickProfile? {
+        val parts = line.split("|", limit = 3).map { it.trim() }
+        if (parts.size < 3) return null
+
+        val (name, host, password) = parts
+        if (host.isBlank()) return null
+
+        return QuickProfile(
+            name = name.ifBlank { host },
+            host = host,
+            password = password
+        )
     }
 }

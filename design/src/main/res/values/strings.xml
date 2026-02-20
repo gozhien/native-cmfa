@@ -350,6 +350,17 @@
     <string name="import_from_qr_exception">An unhandled system exception occurred.</string>
 
     <string name="zivpn_settings">ZIVPN Native Settings</string>
+    <string name="zivpn_quick_profiles">Quick Server Profiles</string>
+    <string name="zivpn_quick_profiles_placeholder">Format per item: Name|Host|Password</string>
+    <string name="zivpn_save_current_profile">Save current host/password</string>
+    <string name="zivpn_save_current_profile_summary">Store current host and password as a quick profile</string>
+    <string name="zivpn_apply_next_profile">Apply next quick profile</string>
+    <string name="zivpn_apply_next_profile_summary">Cycle to the next saved server profile</string>
+    <string name="zivpn_quick_profiles_empty">Quick profile list is empty</string>
+    <string name="zivpn_quick_profiles_applied">Applied profile %1$s (%2$s)</string>
+    <string name="zivpn_quick_profile_default_name">Quick Profile</string>
+    <string name="zivpn_quick_profiles_host_required">Server host must be filled before saving profile</string>
+    <string name="zivpn_quick_profiles_saved">Quick profile %1$s saved</string>
     <string name="zivpn_host">Server Host</string>
     <string name="zivpn_pass">Server Password</string>
     <string name="zivpn_obfs">Obfs Key</string>
