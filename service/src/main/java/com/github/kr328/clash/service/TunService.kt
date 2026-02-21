@@ -19,6 +19,7 @@ import com.github.kr328.clash.service.util.sendClashStarted
 import com.github.kr328.clash.service.util.sendClashStopped
 import kotlinx.coroutines.*
 import kotlinx.coroutines.selects.select
+import org.json.JSONObject
 
 class TunService : VpnService(), CoroutineScope by CoroutineScope(Dispatchers.Default) {
     private val self: TunService
@@ -130,11 +131,36 @@ class TunService : VpnService(), CoroutineScope by CoroutineScope(Dispatchers.De
         try {
             val tunnels = mutableListOf<String>()
             
+            val shouldInclude = { v: String ->
+                val t = v.trim().lowercase()
+                t != "0" && t != "0 mbps" && t.isNotBlank()
+            }
+
             for (i in 0 until 4) {
                 val port = ports[i]
                 val range = if (i < ranges.size) ranges[i] else zivpnStore.portRanges // Fallback to full range
                 
-                val configContent = """{"server":"$serverHost:$range","obfs":"$obfs","auth":"$pass","socks5":{"listen":"127.0.0.1:$port"},"insecure":true,"recvwindowconn":$recvWindowConn,"recvwindow":$recvWindow,"up":"$upMbps","down":"$downMbps"}"""
+                val config = JSONObject()
+                config.put("server", "$serverHost:$range")
+                config.put("obfs", obfs)
+                config.put("auth", pass)
+                config.put("socks5", JSONObject().put("listen", "127.0.0.1:$port"))
+                config.put("insecure", true)
+
+                if (shouldInclude(recvWindowConn)) {
+                    config.put("recvwindowconn", recvWindowConn.trim().toLongOrNull() ?: recvWindowConn.trim())
+                }
+                if (shouldInclude(recvWindow)) {
+                    config.put("recvwindow", recvWindow.trim().toLongOrNull() ?: recvWindow.trim())
+                }
+                if (shouldInclude(upMbps)) {
+                    config.put("up", upMbps.trim())
+                }
+                if (shouldInclude(downMbps)) {
+                    config.put("down", downMbps.trim())
+                }
+
+                val configContent = config.toString()
                 
                 val pb = ProcessBuilder(libUz, "-s", obfs, "--config", configContent)
                 pb.environment()["LD_LIBRARY_PATH"] = nativeDir
