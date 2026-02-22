@@ -4,9 +4,7 @@ import android.content.Context
 import com.github.kr328.clash.common.store.Store
 import com.github.kr328.clash.common.store.asStoreProvider
 import com.github.kr328.clash.service.PreferenceProvider
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
+import org.json.JSONObject
 
 class ZivpnStore(context: Context) {
     private val store = Store(
@@ -14,11 +12,6 @@ class ZivpnStore(context: Context) {
             .createSharedPreferencesFromContext(context)
             .asStoreProvider()
     )
-
-    private val json = Json {
-        ignoreUnknownKeys = true
-        isLenient = true
-    }
 
     var serverHost: String by store.string(
         key = "zivpn_server_host",
@@ -104,13 +97,21 @@ class ZivpnStore(context: Context) {
         if (raw.isBlank()) return null
 
         return runCatching {
-            json.decodeFromString<Map<String, String>>(raw)
+            val profileJson = JSONObject(raw)
+            buildMap {
+                val keys = profileJson.keys()
+
+                while (keys.hasNext()) {
+                    val key = keys.next()
+                    put(key, profileJson.optString(key, ""))
+                }
+            }
         }.getOrNull()
     }
 
     private fun encodeProfiles(value: Map<String, String>?): String {
         if (value.isNullOrEmpty()) return ""
 
-        return json.encodeToString(value)
+        return JSONObject(value).toString()
     }
 }
