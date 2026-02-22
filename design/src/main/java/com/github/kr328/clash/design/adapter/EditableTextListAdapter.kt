@@ -20,8 +20,8 @@ class EditableTextListAdapter<T>(
     fun addElement(text: String) {
         val value = adapter.to(text)
 
-        notifyItemInserted(values.size)
         values.add(value)
+        notifyItemInserted(values.size - 1)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {

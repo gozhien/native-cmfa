@@ -31,9 +31,7 @@ suspend fun Context.requestZivpnServerProfileInput(
 
                 it.resume(ZivpnServerProfile(name, host, pass))
             }
-            .setNegativeButton(R.string.cancel) { _, _ ->
-                it.resume(initial)
-            }
+            .setNegativeButton(R.string.cancel) { _, _ -> }
             .setOnDismissListener { _ ->
                 if (!it.isCompleted)
                     it.resume(initial)

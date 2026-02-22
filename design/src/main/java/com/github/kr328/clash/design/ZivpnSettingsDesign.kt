@@ -8,6 +8,7 @@ import com.github.kr328.clash.design.dialog.requestZivpnServerProfileInput
 import com.github.kr328.clash.design.preference.*
 import com.github.kr328.clash.design.util.applyFrom
 import com.github.kr328.clash.design.util.bindAppBarElevation
+import com.github.kr328.clash.design.ui.ToastDuration
 import com.github.kr328.clash.design.util.layoutInflater
 import com.github.kr328.clash.design.util.root
 import com.github.kr328.clash.service.model.ZivpnServerProfile
@@ -197,9 +198,7 @@ class ZivpnSettingsDesign(
                 .setItems(names) { _, which ->
                     ctx.resume(which)
                 }
-                .setNegativeButton(R.string.cancel) { _, _ ->
-                    ctx.resume(-1)
-                }
+                .setNegativeButton(R.string.cancel) { _, _ -> }
                 .setOnDismissListener {
                     if (!ctx.isCompleted) ctx.resume(-1)
                 }
@@ -214,12 +213,7 @@ class ZivpnSettingsDesign(
             hostPref?.text = selected.host
             passPref?.text = selected.pass
 
-            showToast("Profile selected: ${selected.name}")
+            showToast("Profile selected: ${selected.name}", ToastDuration.Short)
         }
-    }
-
-    private fun showToast(message: String) {
-        // Design usually has a way to show messages or I can use context.
-        android.widget.Toast.makeText(context, message, android.widget.Toast.LENGTH_SHORT).show()
     }
 }

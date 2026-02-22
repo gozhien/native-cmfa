@@ -76,7 +76,7 @@ class ZivpnStore(context: Context) {
     }
 
     fun setProfiles(profiles: List<ZivpnServerProfile>) {
-        serverProfiles = Json.encodeToString(profiles)
+        serverProfiles = Json.encodeToString(ListSerializer(ZivpnServerProfile.serializer()), profiles)
     }
 
     init {
