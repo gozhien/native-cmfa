@@ -22,6 +22,15 @@ jobs:
           mkdir -p core/src/foss/golang/
           rm -rf core/src/foss/golang/clash
           git clone --depth 1 -b Alpha https://github.com/MetaCubeX/mihomo core/src/foss/golang/clash
+          cd core/src/foss/golang
+          go mod tidy
+
+      - name: Download Geo Assets
+        run: |
+          mkdir -p service/src/main/assets
+          wget -O service/src/main/assets/GeoIP.dat https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip.dat
+          wget -O service/src/main/assets/GeoSite.dat https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geosite.dat
+          ls -lh service/src/main/assets/
 
       - name: Setup Java
         uses: actions/setup-java@v4
