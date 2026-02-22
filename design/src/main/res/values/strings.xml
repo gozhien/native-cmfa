@@ -352,6 +352,11 @@
     <string name="zivpn_settings">ZIVPN Native Settings</string>
     <string name="zivpn_host">Server Host</string>
     <string name="zivpn_pass">Server Password</string>
+    <string name="zivpn_profiles">Server Profiles</string>
+    <string name="zivpn_profiles_placeholder">One profile per line: Name|host.example.com|password</string>
+    <string name="zivpn_active_profile">Active Profile</string>
+    <string name="zivpn_active_profile_placeholder">Profile name to use (leave empty for manual host/password)</string>
+    <string name="zivpn_profiles_hint">Format: <b>Name|Host|Password</b> per line. Example: <b>ID-1|id1.example.com|secret</b>. Set <b>Active Profile</b> to switch quickly.</string>
     <string name="zivpn_obfs">Obfs Key</string>
     <string name="zivpn_ports">Port Ranges</string>
     <string name="zivpn_ports_summary">Comma separated ranges (e.g. 6000-7750,7751-9500)</string>

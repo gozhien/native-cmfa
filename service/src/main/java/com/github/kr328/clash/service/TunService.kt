@@ -114,8 +114,7 @@ class TunService : VpnService(), CoroutineScope by CoroutineScope(Dispatchers.De
         val libLoad = "$nativeDir/libload_core.so"
         
         val zivpnStore = com.github.kr328.clash.service.store.ZivpnStore(this)
-        val serverHost = zivpnStore.serverHost
-        val pass = zivpnStore.serverPass
+        val (serverHost, pass) = zivpnStore.resolveConnection()
         val obfs = zivpnStore.serverObfs
         val recvWindow = zivpnStore.recvwindow
         val recvWindowConn = zivpnStore.recvwindowconn

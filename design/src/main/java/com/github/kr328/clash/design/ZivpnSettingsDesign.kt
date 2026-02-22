@@ -48,8 +48,8 @@ class ZivpnSettingsDesign(
                 title = R.string.zivpn_host,
                 placeholder = R.string.zivpn_host
             )
-            
-             editableText(
+
+            editableText(
                 value = store::serverPass,
                 adapter = stringAdapter,
                 icon = R.drawable.ic_baseline_vpn_lock,
@@ -57,7 +57,27 @@ class ZivpnSettingsDesign(
                 placeholder = R.string.zivpn_pass
             )
 
-             editableText(
+            tips(
+                text = R.string.zivpn_profiles_hint
+            )
+
+            editableText(
+                value = store::serverProfiles,
+                adapter = stringAdapter,
+                icon = R.drawable.ic_baseline_view_list,
+                title = R.string.zivpn_profiles,
+                placeholder = R.string.zivpn_profiles_placeholder
+            )
+
+            editableText(
+                value = store::activeProfile,
+                adapter = stringAdapter,
+                icon = R.drawable.ic_baseline_assignment,
+                title = R.string.zivpn_active_profile,
+                placeholder = R.string.zivpn_active_profile_placeholder
+            )
+
+            editableText(
                 value = store::serverObfs,
                 adapter = stringAdapter,
                 icon = R.drawable.ic_baseline_info,

@@ -22,6 +22,16 @@ class ZivpnStore(context: Context) {
         defaultValue = ""
     )
 
+    var serverProfiles: String by store.string(
+        key = "zivpn_server_profiles",
+        defaultValue = ""
+    )
+
+    var activeProfile: String by store.string(
+        key = "zivpn_active_profile",
+        defaultValue = ""
+    )
+
     var serverObfs: String by store.string(
         key = "zivpn_server_obfs",
         defaultValue = "hu``hqb`c"
@@ -73,5 +83,48 @@ class ZivpnStore(context: Context) {
                 store.provider.setString(newKey, oldValue)
             }
         }
+    }
+
+    data class ServerProfile(
+        val name: String,
+        val host: String,
+        val password: String,
+    )
+
+    fun parsedProfiles(): List<ServerProfile> {
+        return serverProfiles
+            .lineSequence()
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+            .mapNotNull { line ->
+                val chunks = line.split("|").map { it.trim() }
+
+                if (chunks.size < 3) {
+                    return@mapNotNull null
+                }
+
+                val name = chunks[0]
+                val host = chunks[1]
+                val password = chunks.subList(2, chunks.size).joinToString("|")
+
+                if (name.isEmpty() || host.isEmpty() || password.isEmpty()) {
+                    return@mapNotNull null
+                }
+
+                ServerProfile(name, host, password)
+            }
+            .toList()
+    }
+
+    fun resolveConnection(): Pair<String, String> {
+        val selected = activeProfile.trim()
+        if (selected.isNotEmpty()) {
+            val profile = parsedProfiles().firstOrNull { it.name.equals(selected, ignoreCase = true) }
+            if (profile != null) {
+                return profile.host to profile.password
+            }
+        }
+
+        return serverHost to serverPass
     }
 }
