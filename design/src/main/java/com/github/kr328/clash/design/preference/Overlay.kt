@@ -39,7 +39,8 @@ suspend fun requestEditableListOverlay(
             }
 
             binding.resetView.setOnClickListener {
-                ctx.resume(EditableListOverlayResult.Reset)
+                if (!ctx.isCompleted)
+                    ctx.resume(EditableListOverlayResult.Reset)
 
                 dialog.dismiss()
             }
@@ -49,7 +50,8 @@ suspend fun requestEditableListOverlay(
             }
 
             binding.okView.setOnClickListener {
-                ctx.resume(EditableListOverlayResult.Apply)
+                if (!ctx.isCompleted)
+                    ctx.resume(EditableListOverlayResult.Apply)
 
                 dialog.dismiss()
             }
