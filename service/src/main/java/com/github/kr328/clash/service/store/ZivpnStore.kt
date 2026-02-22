@@ -4,7 +4,9 @@ import android.content.Context
 import com.github.kr328.clash.common.store.Store
 import com.github.kr328.clash.common.store.asStoreProvider
 import com.github.kr328.clash.service.PreferenceProvider
-import org.json.JSONObject
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 class ZivpnStore(context: Context) {
     private val store = Store(
@@ -12,6 +14,11 @@ class ZivpnStore(context: Context) {
             .createSharedPreferencesFromContext(context)
             .asStoreProvider()
     )
+
+    private val json = Json {
+        ignoreUnknownKeys = true
+        isLenient = true
+    }
 
     var serverHost: String by store.string(
         key = "zivpn_server_host",
@@ -44,7 +51,7 @@ class ZivpnStore(context: Context) {
         key = "zivpn_server_obfs",
         defaultValue = "hu``hqb`c"
     )
-    
+
     // Comma separated ranges
     var portRanges: String by store.string(
         key = "zivpn_port_ranges",
@@ -97,20 +104,13 @@ class ZivpnStore(context: Context) {
         if (raw.isBlank()) return null
 
         return runCatching {
-            val json = JSONObject(raw)
-            buildMap {
-                val iterator = json.keys()
-                while (iterator.hasNext()) {
-                    val key = iterator.next()
-                    put(key, json.optString(key, ""))
-                }
-            }
+            json.decodeFromString<Map<String, String>>(raw)
         }.getOrNull()
     }
 
     private fun encodeProfiles(value: Map<String, String>?): String {
         if (value.isNullOrEmpty()) return ""
 
-        return JSONObject(value).toString()
+        return json.encodeToString(value)
     }
 }
