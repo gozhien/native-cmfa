@@ -29,10 +29,12 @@ suspend fun Context.requestZivpnServerProfileInput(
                 val host = binding.hostView.text?.toString() ?: ""
                 val pass = binding.passView.text?.toString() ?: ""
 
-                it.resume(ZivpnServerProfile(name, host, pass))
+                if (!it.isCompleted)
+                    it.resume(ZivpnServerProfile(name, host, pass))
             }
             .setNegativeButton(R.string.cancel) { _, _ ->
-                it.resume(initial)
+                if (!it.isCompleted)
+                    it.resume(initial)
             }
             .setOnDismissListener { _ ->
                 if (!it.isCompleted)
