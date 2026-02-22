@@ -5,6 +5,7 @@ import com.github.kr328.clash.common.store.Store
 import com.github.kr328.clash.common.store.asStoreProvider
 import com.github.kr328.clash.service.PreferenceProvider
 import com.github.kr328.clash.service.model.ZivpnServerProfile
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -68,7 +69,7 @@ class ZivpnStore(context: Context) {
 
     fun getProfiles(): List<ZivpnServerProfile> {
         return try {
-            Json.decodeFromString(serverProfiles)
+            Json.decodeFromString(ListSerializer(ZivpnServerProfile.serializer()), serverProfiles)
         } catch (e: Exception) {
             emptyList()
         }
