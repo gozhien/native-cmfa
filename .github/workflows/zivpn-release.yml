@@ -22,8 +22,6 @@ jobs:
           mkdir -p core/src/foss/golang/
           rm -rf core/src/foss/golang/clash
           git clone --depth 1 -b Alpha https://github.com/MetaCubeX/mihomo core/src/foss/golang/clash
-          cd core/src/foss/golang
-          go mod tidy
 
       - name: Download Geo Assets
         run: |
@@ -43,6 +41,13 @@ jobs:
         with:
           go-version: "1.22"
 
+      - name: Go Mod Tidy
+        run: |
+          cd core/src/foss/golang
+          go mod tidy
+          cd ../../../main/golang
+          go mod tidy
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
@@ -61,7 +66,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            app/build/outputs/apk/alpha/release/cmfa-*-release.apk
+            app/build/outputs/apk/alpha/release/*.apk
           name: ZIVPN Native Release ${{ github.ref_name }}
           draft: false
           prerelease: false
