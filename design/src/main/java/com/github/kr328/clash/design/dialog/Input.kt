@@ -5,10 +5,53 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.widget.doOnTextChanged
 import com.github.kr328.clash.design.R
 import com.github.kr328.clash.design.databinding.DialogTextFieldBinding
+import com.github.kr328.clash.design.databinding.DialogZivpnServerProfileBinding
 import com.github.kr328.clash.design.util.*
+import com.github.kr328.clash.service.model.ZivpnServerProfile
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
+
+suspend fun Context.requestZivpnServerProfileInput(
+    initial: ZivpnServerProfile?,
+    title: CharSequence,
+): ZivpnServerProfile? {
+    return suspendCancellableCoroutine {
+        val binding = DialogZivpnServerProfileBinding
+            .inflate(layoutInflater, this.root, false)
+
+        val builder = MaterialAlertDialogBuilder(this)
+            .setTitle(title)
+            .setView(binding.root)
+            .setCancelable(true)
+            .setPositiveButton(R.string.ok) { _, _ ->
+                val name = binding.nameView.text?.toString() ?: ""
+                val host = binding.hostView.text?.toString() ?: ""
+                val pass = binding.passView.text?.toString() ?: ""
+
+                it.resume(ZivpnServerProfile(name, host, pass))
+            }
+            .setNegativeButton(R.string.cancel) { _, _ -> }
+            .setOnDismissListener { _ ->
+                if (!it.isCompleted)
+                    it.resume(initial)
+            }
+
+        val dialog = builder.create()
+
+        it.invokeOnCancellation {
+            dialog.dismiss()
+        }
+
+        dialog.setOnShowListener {
+            binding.nameView.setText(initial?.name)
+            binding.hostView.setText(initial?.host)
+            binding.passView.setText(initial?.pass)
+        }
+
+        dialog.show()
+    }
+}
 
 suspend fun Context.requestModelTextInput(
     initial: String,

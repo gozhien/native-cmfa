@@ -2,13 +2,21 @@ package com.github.kr328.clash.design
 
 import android.content.Context
 import android.view.View
+import com.github.kr328.clash.design.adapter.EditableTextListAdapter
 import com.github.kr328.clash.design.databinding.DesignSettingsCommonBinding
+import com.github.kr328.clash.design.dialog.requestZivpnServerProfileInput
 import com.github.kr328.clash.design.preference.*
 import com.github.kr328.clash.design.util.applyFrom
 import com.github.kr328.clash.design.util.bindAppBarElevation
+import com.github.kr328.clash.design.ui.ToastDuration
 import com.github.kr328.clash.design.util.layoutInflater
 import com.github.kr328.clash.design.util.root
+import com.github.kr328.clash.service.model.ZivpnServerProfile
 import com.github.kr328.clash.service.store.ZivpnStore
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
 
 class ZivpnSettingsDesign(
     context: Context,
@@ -17,6 +25,9 @@ class ZivpnSettingsDesign(
 
     private val binding = DesignSettingsCommonBinding
         .inflate(context.layoutInflater, context.root, false)
+
+    private var hostPref: EditableTextPreference? = null
+    private var passPref: EditableTextPreference? = null
 
     override val root: View
         get() = binding.root
@@ -41,15 +52,37 @@ class ZivpnSettingsDesign(
         val screen = preferenceScreen(context) {
             category(R.string.zivpn_settings)
 
-            editableText(
+            clickable(
+                title = R.string.zivpn_server_profiles,
+                icon = R.drawable.ic_baseline_dns,
+            ) {
+                clicked {
+                    launch {
+                        manageProfiles(context, store)
+                    }
+                }
+            }
+
+            clickable(
+                title = R.string.zivpn_select_profile,
+                icon = R.drawable.ic_baseline_dns,
+            ) {
+                clicked {
+                    launch {
+                        selectProfile(context, store)
+                    }
+                }
+            }
+
+            hostPref = editableText(
                 value = store::serverHost,
                 adapter = stringAdapter,
                 icon = R.drawable.ic_baseline_dns,
                 title = R.string.zivpn_host,
                 placeholder = R.string.zivpn_host
             )
-            
-             editableText(
+
+            passPref = editableText(
                 value = store::serverPass,
                 adapter = stringAdapter,
                 icon = R.drawable.ic_baseline_vpn_lock,
@@ -115,5 +148,72 @@ class ZivpnSettingsDesign(
         }
 
         binding.content.addView(screen.root)
+    }
+
+    private suspend fun manageProfiles(context: Context, store: ZivpnStore) {
+        val profiles = store.getProfiles().toMutableList()
+        val adapter = EditableTextListAdapter(context, profiles, object : TextAdapter<ZivpnServerProfile> {
+            override fun from(value: ZivpnServerProfile): String = value.name
+            override fun to(text: String): ZivpnServerProfile = ZivpnServerProfile(text, "", "")
+        })
+
+        adapter.onEdit = { profile ->
+            launch {
+                val edited = context.requestZivpnServerProfileInput(profile, context.getString(R.string.zivpn_edit_profile))
+                if (edited != null) {
+                    val index = profiles.indexOf(profile)
+                    if (index >= 0) {
+                        profiles[index] = edited
+                        adapter.notifyItemChanged(index)
+                    }
+                }
+            }
+        }
+
+        val result = requestEditableListOverlay(context, adapter, context.getString(R.string.zivpn_server_profiles)) {
+            val newProfile = context.requestZivpnServerProfileInput(null, context.getString(R.string.zivpn_add_profile))
+            if (newProfile != null) {
+                profiles.add(newProfile)
+                adapter.notifyItemInserted(profiles.size - 1)
+            }
+        }
+
+        if (result == EditableListOverlayResult.Apply) {
+            store.setProfiles(profiles)
+        }
+    }
+
+    private suspend fun selectProfile(
+        context: Context,
+        store: ZivpnStore,
+    ) {
+        val profiles = store.getProfiles()
+        if (profiles.isEmpty()) return
+
+        val names = profiles.map { it.name }.toTypedArray()
+
+        val selectedIndex = suspendCancellableCoroutine<Int> { ctx ->
+            MaterialAlertDialogBuilder(context)
+                .setTitle(R.string.zivpn_select_profile)
+                .setItems(names) { _, which ->
+                    ctx.resume(which)
+                }
+                .setNegativeButton(R.string.cancel) { _, _ -> }
+                .setOnDismissListener {
+                    if (!ctx.isCompleted) ctx.resume(-1)
+                }
+                .show()
+        }
+
+        if (selectedIndex >= 0) {
+            val selected = profiles[selectedIndex]
+            store.serverHost = selected.host
+            store.serverPass = selected.pass
+
+            hostPref?.text = selected.host
+            passPref?.text = selected.pass
+
+            showToast("Profile selected: ${selected.name}", ToastDuration.Short)
+        }
     }
 }
