@@ -350,6 +350,19 @@
     <string name="import_from_qr_exception">An unhandled system exception occurred.</string>
 
     <string name="zivpn_settings">ZIVPN Native Settings</string>
+    <string name="zivpn_active_profile">Active Profile Name</string>
+    <string name="zivpn_active_profile_hint">Enter profile name (e.g. singapore-01)</string>
+    <string name="zivpn_server_profiles">Server Profiles</string>
+    <string name="zivpn_server_profiles_hint">Map profile name to server host</string>
+    <string name="zivpn_password_profiles">Password Profiles</string>
+    <string name="zivpn_password_profiles_hint">Map profile name to server password</string>
+    <string name="zivpn_apply_profile">Apply Active Profile</string>
+    <string name="zivpn_apply_profile_summary">Apply server and password from active profile name</string>
+    <string name="zivpn_save_current_profile">Save Current Host &amp; Password as Profile</string>
+    <string name="zivpn_save_current_profile_summary">Store current Server Host and Server Password into profile map</string>
+    <string name="zivpn_profile_not_found">Profile is incomplete or not found in server/password maps</string>
+    <string name="zivpn_profile_applied">Profile applied to Server Host and Password</string>
+    <string name="zivpn_profile_saved">Current host/password saved to profile</string>
     <string name="zivpn_host">Server Host</string>
     <string name="zivpn_pass">Server Password</string>
     <string name="zivpn_obfs">Obfs Key</string>

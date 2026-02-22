@@ -4,6 +4,7 @@ import android.content.Context
 import com.github.kr328.clash.common.store.Store
 import com.github.kr328.clash.common.store.asStoreProvider
 import com.github.kr328.clash.service.PreferenceProvider
+import org.json.JSONObject
 
 class ZivpnStore(context: Context) {
     private val store = Store(
@@ -20,6 +21,23 @@ class ZivpnStore(context: Context) {
     var serverPass: String by store.string(
         key = "zivpn_server_pass",
         defaultValue = ""
+    )
+
+    var activeProfileName: String by store.string(
+        key = "zivpn_active_profile_name",
+        defaultValue = ""
+    )
+
+    var serverProfiles: Map<String, String>? by store.typedString(
+        key = "zivpn_server_profiles",
+        from = { decodeProfiles(it) },
+        to = { encodeProfiles(it) }
+    )
+
+    var passwordProfiles: Map<String, String>? by store.typedString(
+        key = "zivpn_password_profiles",
+        from = { decodeProfiles(it) },
+        to = { encodeProfiles(it) }
     )
 
     var serverObfs: String by store.string(
@@ -73,5 +91,26 @@ class ZivpnStore(context: Context) {
                 store.provider.setString(newKey, oldValue)
             }
         }
+    }
+
+    private fun decodeProfiles(raw: String): Map<String, String>? {
+        if (raw.isBlank()) return null
+
+        return runCatching {
+            val json = JSONObject(raw)
+            buildMap {
+                val iterator = json.keys()
+                while (iterator.hasNext()) {
+                    val key = iterator.next()
+                    put(key, json.optString(key, ""))
+                }
+            }
+        }.getOrNull()
+    }
+
+    private fun encodeProfiles(value: Map<String, String>?): String {
+        if (value.isNullOrEmpty()) return ""
+
+        return JSONObject(value).toString()
     }
 }
