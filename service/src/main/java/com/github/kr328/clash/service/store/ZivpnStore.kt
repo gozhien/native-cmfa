@@ -32,6 +32,11 @@ class ZivpnStore(context: Context) {
         defaultValue = ""
     )
 
+    var useActiveProfile: Boolean by store.boolean(
+        key = "zivpn_use_active_profile",
+        defaultValue = false,
+    )
+
     var serverObfs: String by store.string(
         key = "zivpn_server_obfs",
         defaultValue = "hu``hqb`c"
@@ -116,9 +121,15 @@ class ZivpnStore(context: Context) {
             .toList()
     }
 
+    fun saveProfiles(profiles: List<ServerProfile>) {
+        serverProfiles = profiles.joinToString("\n") {
+            "${it.name}|${it.host}|${it.password}"
+        }
+    }
+
     fun resolveConnection(): Pair<String, String> {
         val selected = activeProfile.trim()
-        if (selected.isNotEmpty()) {
+        if (useActiveProfile && selected.isNotEmpty()) {
             val profile = parsedProfiles().firstOrNull { it.name.equals(selected, ignoreCase = true) }
             if (profile != null) {
                 return profile.host to profile.password
