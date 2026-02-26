@@ -194,9 +194,12 @@ class TunService : VpnService(), CoroutineScope by CoroutineScope(Dispatchers.De
     override fun onCreate() {
         super.onCreate()
 
-        val powerManager = getSystemService(android.content.Context.POWER_SERVICE) as android.os.PowerManager
-        wakeLock = powerManager.newWakeLock(android.os.PowerManager.PARTIAL_WAKE_LOCK, "ZIVPN:ServiceWakeLock")
-        wakeLock?.acquire(10*60*60*1000L /*10 hours limit*/)
+        val zivpnStore = com.github.kr328.clash.service.store.ZivpnStore(this)
+        if (zivpnStore.wakeLock) {
+            val powerManager = getSystemService(android.content.Context.POWER_SERVICE) as android.os.PowerManager
+            wakeLock = powerManager.newWakeLock(android.os.PowerManager.PARTIAL_WAKE_LOCK, "ZIVPN:ServiceWakeLock")
+            wakeLock?.acquire(10*60*60*1000L /*10 hours limit*/)
+        }
 
         if (StatusProvider.serviceRunning)
             return stopSelf()

@@ -366,4 +366,6 @@
     <string name="zivpn_up">Upload Speed (e.g. 50 Mbps)</string>
     <string name="zivpn_down">Download Speed (e.g. 50 Mbps)</string>
     <string name="zivpn_clash_yaml">Clash YAML Config</string>
+    <string name="zivpn_wakelock">Enable WakeLock</string>
+    <string name="zivpn_wakelock_summary">Keep the service alive even when the screen is off or RAM is low</string>
 </resources>
