@@ -25,7 +25,7 @@ suspend fun Context.requestZivpnServerProfileInput(
             .setView(binding.root)
             .setCancelable(true)
             .setPositiveButton(R.string.ok) { _, _ ->
-                val name = binding.nameView.text?.toString() ?: ""
+                val name = initial?.name ?: ""
                 val address = binding.hostView.text?.toString() ?: ""
 
                 val separatorIndex = address.lastIndexOf('@')
@@ -50,8 +50,6 @@ suspend fun Context.requestZivpnServerProfileInput(
         }
 
         dialog.setOnShowListener {
-            binding.nameView.setText(initial?.name)
-
             if (initial != null) {
                 binding.hostView.setText("${initial.host}@${initial.pass}")
             }

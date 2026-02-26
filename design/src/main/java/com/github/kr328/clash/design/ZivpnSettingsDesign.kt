@@ -160,7 +160,9 @@ class ZivpnSettingsDesign(
     private suspend fun manageProfiles(context: Context, store: ZivpnStore) {
         val profiles = store.getProfiles().toMutableList()
         val adapter = EditableTextListAdapter(context, profiles, object : TextAdapter<ZivpnServerProfile> {
-            override fun from(value: ZivpnServerProfile): String = "${value.name} (${value.host}@${value.pass})"
+            override fun from(value: ZivpnServerProfile): String {
+                return if (value.name.isBlank()) "${value.host}@${value.pass}" else "${value.name} (${value.host}@${value.pass})"
+            }
             override fun to(text: String): ZivpnServerProfile = ZivpnServerProfile(text, "", "")
         })
 
@@ -197,7 +199,9 @@ class ZivpnSettingsDesign(
         val profiles = store.getProfiles()
         if (profiles.isEmpty()) return
 
-        val names = profiles.map { "${it.name} (${it.host}@${it.pass})" }.toTypedArray()
+        val names = profiles.map {
+            if (it.name.isBlank()) "${it.host}@${it.pass}" else "${it.name} (${it.host}@${it.pass})"
+        }.toTypedArray()
 
         val selectedIndex = suspendCancellableCoroutine<Int> { ctx ->
             MaterialAlertDialogBuilder(context)
@@ -220,7 +224,8 @@ class ZivpnSettingsDesign(
             hostPref?.text = selected.host
             passPref?.text = selected.pass
 
-            showToast("Profile selected: ${selected.name}", ToastDuration.Short)
+            val displayName = if (selected.name.isBlank()) "${selected.host}@${selected.pass}" else selected.name
+            showToast("Profile selected: $displayName", ToastDuration.Short)
         }
     }
 }
