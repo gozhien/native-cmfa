@@ -153,7 +153,7 @@ class ZivpnSettingsDesign(
     private suspend fun manageProfiles(context: Context, store: ZivpnStore) {
         val profiles = store.getProfiles().toMutableList()
         val adapter = EditableTextListAdapter(context, profiles, object : TextAdapter<ZivpnServerProfile> {
-            override fun from(value: ZivpnServerProfile): String = "${value.name} (${value.pass})"
+            override fun from(value: ZivpnServerProfile): String = "${value.name} (${value.host}@${value.pass})"
             override fun to(text: String): ZivpnServerProfile = ZivpnServerProfile(text, "", "")
         })
 
@@ -190,7 +190,7 @@ class ZivpnSettingsDesign(
         val profiles = store.getProfiles()
         if (profiles.isEmpty()) return
 
-        val names = profiles.map { "${it.name} (${it.pass})" }.toTypedArray()
+        val names = profiles.map { "${it.name} (${it.host}@${it.pass})" }.toTypedArray()
 
         val selectedIndex = suspendCancellableCoroutine<Int> { ctx ->
             MaterialAlertDialogBuilder(context)

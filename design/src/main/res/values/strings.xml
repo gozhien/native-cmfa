@@ -354,6 +354,7 @@
     <string name="zivpn_add_profile">Add Profile</string>
     <string name="zivpn_edit_profile">Edit Profile</string>
     <string name="zivpn_select_profile">Select Profile</string>
+    <string name="zivpn_address_hint">IP/Domain@Password</string>
     <string name="zivpn_host">Server Host</string>
     <string name="zivpn_pass">Server Password</string>
     <string name="zivpn_obfs">Obfs Key</string>

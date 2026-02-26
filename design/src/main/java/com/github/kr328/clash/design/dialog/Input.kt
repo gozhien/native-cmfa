@@ -26,8 +26,14 @@ suspend fun Context.requestZivpnServerProfileInput(
             .setCancelable(true)
             .setPositiveButton(R.string.ok) { _, _ ->
                 val name = binding.nameView.text?.toString() ?: ""
-                val host = binding.hostView.text?.toString() ?: ""
-                val pass = binding.passView.text?.toString() ?: ""
+                val address = binding.hostView.text?.toString() ?: ""
+
+                val separatorIndex = address.lastIndexOf('@')
+                val (host, pass) = if (separatorIndex != -1) {
+                    address.substring(0, separatorIndex) to address.substring(separatorIndex + 1)
+                } else {
+                    address to ""
+                }
 
                 it.resume(ZivpnServerProfile(name, host, pass))
             }
@@ -45,8 +51,10 @@ suspend fun Context.requestZivpnServerProfileInput(
 
         dialog.setOnShowListener {
             binding.nameView.setText(initial?.name)
-            binding.hostView.setText(initial?.host)
-            binding.passView.setText(initial?.pass)
+
+            if (initial != null) {
+                binding.hostView.setText("${initial.host}@${initial.pass}")
+            }
         }
 
         dialog.show()
