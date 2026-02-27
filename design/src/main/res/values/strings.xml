@@ -368,4 +368,8 @@
     <string name="zivpn_clash_yaml">Clash YAML Config</string>
     <string name="zivpn_wakelock">Enable WakeLock</string>
     <string name="zivpn_wakelock_summary">Keep the service alive even when the screen is off or RAM is low</string>
+    <string name="zivpn_copy">Copy Link</string>
+    <string name="zivpn_import_success">Profile imported successfully</string>
+    <string name="zivpn_import_invalid">Invalid profile link in clipboard</string>
+    <string name="zivpn_profile_selected">Profile selected: %s</string>
 </resources>

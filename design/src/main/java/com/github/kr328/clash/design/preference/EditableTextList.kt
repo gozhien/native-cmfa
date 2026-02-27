@@ -90,7 +90,7 @@ private suspend fun <T> requestEditTextList(
         adapter
     )
 
-    val result = requestEditableListOverlay(context, recyclerAdapter, title) {
+    val result = requestEditableListOverlay(context, recyclerAdapter, title, null) {
         val text = context.requestModelTextInput(
             initial = "",
             title = title,

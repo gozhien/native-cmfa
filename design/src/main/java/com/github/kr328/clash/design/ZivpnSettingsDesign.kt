@@ -1,7 +1,10 @@
 package com.github.kr328.clash.design
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.view.View
+import androidx.core.content.getSystemService
 import com.github.kr328.clash.design.adapter.EditableTextListAdapter
 import com.github.kr328.clash.design.databinding.DesignSettingsCommonBinding
 import com.github.kr328.clash.design.dialog.requestZivpnServerProfileInput
@@ -166,6 +169,15 @@ class ZivpnSettingsDesign(
             override fun to(text: String): ZivpnServerProfile = ZivpnServerProfile(text, "", "")
         })
 
+        adapter.onCopy = { profile ->
+            launch {
+                val link = "zivpn://${profile.host}@${profile.pass}"
+                val data = ClipData.newPlainText("zivpn_profile", link)
+                context.getSystemService<ClipboardManager>()?.setPrimaryClip(data)
+                showToast(R.string.zivpn_copy, ToastDuration.Short)
+            }
+        }
+
         adapter.onEdit = { profile ->
             launch {
                 val edited = context.requestZivpnServerProfileInput(profile, context.getString(R.string.zivpn_edit_profile))
@@ -179,7 +191,34 @@ class ZivpnSettingsDesign(
             }
         }
 
-        val result = requestEditableListOverlay(context, adapter, context.getString(R.string.zivpn_server_profiles)) {
+        val result = requestEditableListOverlay(
+            context,
+            adapter,
+            context.getString(R.string.zivpn_server_profiles),
+            importFromClipboard = {
+                val clipboard = context.getSystemService<ClipboardManager>()
+                val text = clipboard?.primaryClip?.getItemAt(0)?.text?.toString() ?: ""
+                if (text.startsWith("zivpn://")) {
+                    val address = text.substring(8)
+                    val separatorIndex = address.lastIndexOf('@')
+                    val (host, pass) = if (separatorIndex != -1) {
+                        address.substring(0, separatorIndex) to address.substring(separatorIndex + 1)
+                    } else {
+                        address to ""
+                    }
+                    if (host.isNotBlank()) {
+                        val newProfile = ZivpnServerProfile("", host, pass)
+                        profiles.add(newProfile)
+                        adapter.notifyItemInserted(profiles.size - 1)
+                        showToast(R.string.zivpn_import_success, ToastDuration.Short)
+                    } else {
+                        showToast(R.string.zivpn_import_invalid, ToastDuration.Short)
+                    }
+                } else {
+                    showToast(R.string.zivpn_import_invalid, ToastDuration.Short)
+                }
+            }
+        ) {
             val newProfile = context.requestZivpnServerProfileInput(null, context.getString(R.string.zivpn_add_profile))
             if (newProfile != null) {
                 profiles.add(newProfile)
@@ -225,7 +264,7 @@ class ZivpnSettingsDesign(
             passPref?.text = selected.pass
 
             val displayName = if (selected.name.isBlank()) "${selected.host}@${selected.pass}" else selected.name
-            showToast("Profile selected: $displayName", ToastDuration.Short)
+            showToast(context.getString(R.string.zivpn_profile_selected, displayName), ToastDuration.Short)
         }
     }
 }
