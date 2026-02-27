@@ -27,9 +27,22 @@
                 android:layout_alignBottom="@id/new_view"
                 android:layout_alignParentStart="true"
                 android:layout_marginHorizontal="@dimen/item_header_margin"
-                android:layout_toStartOf="@id/new_view"
+                android:layout_toStartOf="@id/import_view"
                 android:gravity="center_vertical"
                 android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6" />
+
+            <ImageView
+                android:id="@+id/import_view"
+                android:layout_width="@dimen/item_tailing_component_size"
+                android:layout_height="@dimen/item_tailing_component_size"
+                android:layout_toStartOf="@id/new_view"
+                android:layout_marginVertical="@dimen/item_tailing_margin"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:contentDescription="@string/import_"
+                android:focusable="true"
+                android:padding="@dimen/toolbar_image_action_padding"
+                android:src="@drawable/ic_baseline_cloud_download" />
 
             <ImageView
                 android:id="@+id/new_view"

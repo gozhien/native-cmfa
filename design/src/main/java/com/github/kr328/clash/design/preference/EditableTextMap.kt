@@ -101,7 +101,7 @@ private suspend fun <K, V> requestEditTextMap(
         valueAdapter,
     )
 
-    val result = requestEditableListOverlay(context, recyclerAdapter, title) {
+    val result = requestEditableListOverlay(context, recyclerAdapter, title, null) {
         val newItem = requestModelInputEntry(context, title)
 
         if (newItem != null) {

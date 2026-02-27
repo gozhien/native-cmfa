@@ -62,6 +62,11 @@ class ZivpnStore(context: Context) {
         defaultValue = ""
     )
 
+    var wakeLock: Boolean by store.boolean(
+        key = "zivpn_wakelock",
+        defaultValue = true
+    )
+
     var serverProfiles: String by store.string(
         key = "zivpn_server_profiles",
         defaultValue = "[]"
